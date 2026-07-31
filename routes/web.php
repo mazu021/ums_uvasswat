@@ -107,6 +107,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/students/{student}/transcript', [ExaminationModuleController::class, 'transcript'])->name('exams.transcript');
             Route::get('/students/{student}/degree-audit', [ExaminationModuleController::class, 'degreeAudit'])->name('exams.degree-audit');
         });
+
+        // Faculty Leave Application & Management
+        Route::prefix('hr')->name('hr.')->group(function () {
+            Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
+            Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
+        });
     });
 
     // 3. Admin & Staff Management Routes (Restricted: NOT accessible by Students or Faculty Teachers!)
@@ -147,8 +153,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
             Route::post('/attendance', [AttendanceController::class, 'mark'])->name('attendance.mark');
 
-            Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
-            Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
             Route::patch('/leaves/{leaveApplication}/status', [LeaveController::class, 'updateStatus'])->name('leaves.update-status');
 
             Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
