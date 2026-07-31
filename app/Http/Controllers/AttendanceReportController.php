@@ -19,7 +19,17 @@ class AttendanceReportController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $isSuperAdmin = $user->hasRole('Super Admin') || $user->hasRole('Admin') || $user->hasRole('Super-Admin');
+        $isSuperAdmin = $user->hasRole('Super Admin') || 
+                        $user->hasRole('Admin') || 
+                        $user->hasRole('Super-Admin') || 
+                        $user->hasRole('Director IT') || 
+                        $user->hasRole('HR Manager') || 
+                        $user->hasRole('HOD') || 
+                        $user->hasRole('Dean') || 
+                        $user->hasRole('Vice Chancellor') || 
+                        $user->hasRole('Registrar') ||
+                        $user->hasRole('Controller of Examinations') ||
+                        (!$user->hasRole('Teacher') && !$user->hasRole('Faculty'));
 
         // Auto-sync teacher assignments for non-admins
         if (!$isSuperAdmin) {
