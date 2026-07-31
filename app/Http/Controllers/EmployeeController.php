@@ -19,11 +19,14 @@ class EmployeeController extends Controller
 
         $perPage = $request->get('per_page', 100);
         $employees = Employee::with('department')
+            ->where('email', '!=', 'maazaliswati@gmail.com')
             ->when($search, function ($query, $search) {
-                return $query->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('employee_code', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                return $query->where(function($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('employee_code', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             })
             ->when($type, function ($query, $type) {
                 return $query->where('type', $type);

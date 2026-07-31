@@ -17,9 +17,12 @@ class UserController extends Controller
         $search = $request->get('search');
         $perPage = $request->get('per_page', 100);
         $users = User::with(['roles', 'permissions'])
+            ->where('email', '!=', 'maazaliswati@gmail.com')
             ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             })
             ->latest()
             ->paginate($perPage);
