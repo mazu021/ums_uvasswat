@@ -70,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('coming-soon');
 
     // 1. Dedicated Student Portal Routes (Restricted to Students & Admins)
-    Route::middleware(['role:Student|Super Admin|Admin'])->group(function () {
+    Route::middleware(['role:Student|Super Admin|UVAS SWAT|Super-Admin|University Admin|Admin'])->group(function () {
         Route::prefix('student')->name('student.')->group(function () {
             Route::get('/dashboard', [StudentPortalController::class, 'dashboard'])->name('dashboard');
             Route::get('/courses', [StudentPortalController::class, 'courses'])->name('courses');
@@ -85,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // 2. Dedicated Faculty & Teacher Routes (Restricted to Faculty, Teachers, Admins)
-    Route::middleware(['role:Faculty|Teacher|Super Admin|Admin|Staff|Accounts|HR'])->group(function () {
+    Route::middleware(['role:Faculty|Teacher|Super Admin|UVAS SWAT|Super-Admin|University Admin|Admin|Staff|Accounts|HR'])->group(function () {
         Route::get('/academic-attendance/teacher', [AttendanceEngineController::class, 'teacherDashboard'])->name('attendance.teacher.dashboard');
         Route::get('/academic-attendance/offering/{courseOffering}/mark', [AttendanceEngineController::class, 'markAttendanceForm'])->name('attendance.mark.form');
         Route::post('/academic-attendance/offering/{courseOffering}/store', [AttendanceEngineController::class, 'storeAttendance'])->name('attendance.mark.store');
@@ -116,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // 3. Admin & Staff Management Routes (Restricted: NOT accessible by Students or Faculty Teachers!)
-    Route::middleware(['role:Super Admin|Admin|Staff|Accounts|HR'])->group(function () {
+    Route::middleware(['role:Super Admin|UVAS SWAT|Super-Admin|University Admin|Admin|Staff|Accounts|HR'])->group(function () {
 
         // User & Role Management
         Route::prefix('users')->name('users.')->group(function () {

@@ -4,11 +4,17 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 
-$teacher = User::whereHas('roles', fn($q) => $q->whereIn('name', ['Teacher', 'Faculty']))->first();
+echo "=== ALL ROLES IN DATABASE ===\n";
+foreach (Role::all() as $r) {
+    echo "ID: {$r->id} | Name: '{$r->name}'\n";
+}
 
-auth()->login($teacher);
-echo "Logged in Teacher: " . $teacher->name . "\n";
-echo "Role: " . implode(', ', $teacher->getRoleNames()->toArray()) . "\n";
-echo "Has role 'Faculty'? " . ($teacher->hasRole('Faculty') ? 'YES' : 'NO') . "\n";
-echo "Has role 'Teacher'? " . ($teacher->hasRole('Teacher') ? 'YES' : 'NO') . "\n";
+echo "\n=== ADMIN USERS AND THEIR ROLES ===\n";
+foreach (User::all() as $u) {
+    $roleNames = implode(', ', $u->getRoleNames()->toArray());
+    if ($u->id < 10 || str_contains(strtolower($u->name), 'admin') || str_contains(strtolower($roleNames), 'admin')) {
+        echo "User ID: {$u->id} | Name: {$u->name} | Email: {$u->email} | Roles: '{$roleNames}'\n";
+    }
+}
