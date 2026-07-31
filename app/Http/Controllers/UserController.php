@@ -36,11 +36,7 @@ class UserController extends Controller
             ->latest()
             ->paginate($perPage);
 
-        $rolesQuery = Role::query();
-        if (!$isSuperAdminUser) {
-            $rolesQuery->whereNotIn('name', ['Director IT', 'Super Admin', 'UVAS SWAT']);
-        }
-        $roles = $rolesQuery->get();
+        $roles = Role::whereNotIn('name', ['Director IT', 'Super Admin', 'UVAS SWAT'])->get();
 
         $permissions = Permission::orderBy('name')->get();
 

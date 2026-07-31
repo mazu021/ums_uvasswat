@@ -11,17 +11,9 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-        $isSuperAdminUser = $user && in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
-
-        $rolesQuery = Role::with('permissions');
-        
-        // Hide Director IT & Super Admin roles from regular admins
-        if (!$isSuperAdminUser) {
-            $rolesQuery->whereNotIn('name', ['Director IT', 'Super Admin', 'UVAS SWAT']);
-        }
-
-        $roles = $rolesQuery->get();
+        $roles = Role::with('permissions')
+            ->whereNotIn('name', ['Super Admin', 'Director IT', 'UVAS SWAT'])
+            ->get();
         $permissions = Permission::orderBy('name')->get();
 
         return view('roles.index', compact('roles', 'permissions'));
