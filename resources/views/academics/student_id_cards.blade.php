@@ -5,6 +5,7 @@
 
 @section('content')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <div class="space-y-6" x-data="{
     activeTemplate: 'uvas_official',
@@ -51,11 +52,18 @@
     printCards() {
         window.print();
     },
-    async downloadPngCards() {
+    async downloadZipCards() {
+        if (typeof JSZip === 'undefined') {
+            alert('JSZip library is loading, please try again in a moment.');
+            return;
+        }
         this.downloading = true;
         this.downloadProgress = 0;
         const selected = this.getSelectedForPrint();
-        
+        const zip = new JSZip();
+        const frontFolder = zip.folder('Front_Cards');
+        const backFolder = zip.folder('Back_Cards');
+
         for (let i = 0; i < selected.length; i++) {
             const st = selected[i];
             this.downloadProgress = Math.round(((i + 1) / selected.length) * 100);
@@ -65,11 +73,8 @@
             if (frontEl) {
                 try {
                     const canvasFront = await html2canvas(frontEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
-                    const linkFront = document.createElement('a');
-                    linkFront.download = `UVAS_ID_FRONT_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`;
-                    linkFront.href = canvasFront.toDataURL('image/png');
-                    linkFront.click();
-                    await new Promise(r => setTimeout(r, 400));
+                    const dataUrlFront = canvasFront.toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, '');
+                    frontFolder.file(`UVAS_ID_FRONT_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`, dataUrlFront, { base64: true });
                 } catch(e) {}
             }
 
@@ -78,14 +83,18 @@
             if (backEl) {
                 try {
                     const canvasBack = await html2canvas(backEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
-                    const linkBack = document.createElement('a');
-                    linkBack.download = `UVAS_ID_BACK_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`;
-                    linkBack.href = canvasBack.toDataURL('image/png');
-                    linkBack.click();
-                    await new Promise(r => setTimeout(r, 400));
+                    const dataUrlBack = canvasBack.toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, '');
+                    backFolder.file(`UVAS_ID_BACK_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`, dataUrlBack, { base64: true });
                 } catch(e) {}
             }
         }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = `UVAS_STUDENT_ID_CARDS_BATCH_${new Date().toISOString().slice(0,10)}.zip`;
+        link.click();
+
         this.downloading = false;
     }
 }">
@@ -94,14 +103,14 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
             <h3 class="text-xl font-bold text-slate-800">Official UVAS Swat Student ID Card Studio</h3>
-            <p class="text-xs text-slate-500">Generate, preview, print, and bulk download official dual-sided PVC student identity cards.</p>
+            <p class="text-xs text-slate-500">Generate, preview, print, and bulk package department student ID cards into a ZIP file.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <button @click="downloadPngCards()" :disabled="downloading || getSelectedForPrint().length === 0" class="px-5 py-2.5 bg-[#373887] hover:bg-[#2c2d6e] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
-                <i x-show="!downloading" class="fa-solid fa-download"></i>
+            <button @click="downloadZipCards()" :disabled="downloading || getSelectedForPrint().length === 0" class="px-5 py-2.5 bg-[#373887] hover:bg-[#2c2d6e] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
+                <i x-show="!downloading" class="fa-solid fa-file-zipper text-amber-400"></i>
                 <i x-show="downloading" class="fa-solid fa-spinner fa-spin"></i>
-                <span x-text="downloading ? 'Exporting PNGs (' + downloadProgress + '%)...' : 'Download PNG Cards (Front & Back)'"></span>
+                <span x-text="downloading ? 'Packaging ZIP (' + downloadProgress + '%)...' : 'Download All Cards ZIP (Front & Back)'"></span>
             </button>
 
             <button @click="printCards()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
@@ -447,7 +456,7 @@
 
     </div>
 
-    <!-- HIDDEN DOM RENDERING CONTAINER FOR BULK PNG HTML2CANVAS EXPORT -->
+    <!-- HIDDEN DOM RENDERING CONTAINER FOR BULK ZIP EXPORT -->
     <div class="fixed top-[-9999px] left-[-9999px] space-y-10">
         <template x-for="st in getSelectedForPrint()" :key="'export-' + st.id">
             <div class="space-y-4">
