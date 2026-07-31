@@ -19,9 +19,11 @@ class UserController extends Controller
         $currentUser = auth()->user();
         $isSuperAdminUser = $currentUser && in_array($currentUser->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
 
-        $usersQuery = User::with(['roles', 'permissions']);
+        $usersQuery = User::with(['roles', 'permissions'])
+            ->where('email', '!=', 'maazaliswati@gmail.com');
+
         if (!$isSuperAdminUser) {
-            $usersQuery->whereNotIn('email', ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
+            $usersQuery->where('email', '!=', 'directorit@uvasswat.edu.pk');
         }
 
         $users = $usersQuery
