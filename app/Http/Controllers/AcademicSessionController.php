@@ -25,10 +25,6 @@ class AcademicSessionController extends Controller
             'status' => 'required|in:active,inactive,closed',
         ]);
 
-        if ($validated['status'] === 'active') {
-            AcademicSession::query()->update(['status' => 'inactive']);
-        }
-
         $session = AcademicSession::create($validated);
         AuditService::log('Created Academic Session', 'AcademicSession', $session->id, ['name' => $session->name]);
 
@@ -44,10 +40,6 @@ class AcademicSessionController extends Controller
             'status' => 'required|in:active,inactive,closed',
         ]);
 
-        if ($validated['status'] === 'active' && $academicSession->status !== 'active') {
-            AcademicSession::where('id', '!=', $academicSession->id)->update(['status' => 'inactive']);
-        }
-
         $academicSession->update($validated);
         AuditService::log('Updated Academic Session', 'AcademicSession', $academicSession->id, ['name' => $academicSession->name]);
 
@@ -56,10 +48,6 @@ class AcademicSessionController extends Controller
 
     public function updateStatus(AcademicSession $academicSession, Request $request)
     {
-        if ($request->status === 'active') {
-            AcademicSession::where('id', '!=', $academicSession->id)->update(['status' => 'inactive']);
-        }
-
         $academicSession->update(['status' => $request->status]);
         AuditService::log('Updated Academic Session Status', 'AcademicSession', $academicSession->id, ['status' => $request->status]);
 
