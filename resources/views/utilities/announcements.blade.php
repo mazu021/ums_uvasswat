@@ -4,16 +4,28 @@
 @section('header_title', 'Campus Announcements & Official Notifications')
 
 @section('content')
+@php
+    $currentUser = Auth::user();
+    $canManage = $currentUser && (
+        $currentUser->hasRole('Super Admin') ||
+        $currentUser->hasRole('Director IT') ||
+        $currentUser->hasRole('Admin') ||
+        $currentUser->hasRole('UVAS SWAT') ||
+        in_array($currentUser->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk'])
+    );
+@endphp
+
 <div class="space-y-6" x-data="{ createModal: false }">
 
+    <!-- Top Header & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h3 class="text-xl font-bold text-slate-800">University Announcements & Notice Board</h3>
             <p class="text-xs text-slate-500">Official notifications, institutional alerts, and campus news updates.</p>
         </div>
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Admin'))
-            <button @click="createModal = true" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-2 transition">
-                <i class="fa-solid fa-bullhorn"></i>
+        @if($canManage)
+            <button @click="createModal = true" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg flex items-center space-x-2 transition">
+                <i class="fa-solid fa-bullhorn me-1"></i>
                 <span>Publish New Announcement</span>
             </button>
         @endif
@@ -37,8 +49,11 @@
                     </span>
                 </div>
                 <h4 class="font-extrabold text-base text-slate-900 leading-snug">{{ $ann->title }}</h4>
-                @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Admin'))
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end text-xs">
+                <p class="text-xs text-slate-600 leading-relaxed font-normal whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-100">{{ $ann->content }}</p>
+
+                @if($canManage)
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-[11px] text-slate-400 font-medium">Published by: <strong class="text-slate-700">{{ $ann->creator->name ?? 'UVAS Administration' }}</strong></span>
                         <form action="{{ route('announcements.destroy', $ann->id) }}" method="POST" onsubmit="return confirm('Remove this announcement?')">
                             @csrf
                             @method('DELETE')
@@ -63,13 +78,13 @@
     </div>
 
     <!-- Create Modal (For Admins) -->
-    @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Admin'))
+    @if($canManage)
         <div x-show="createModal" x-transition class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" style="display: none;">
-            <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100" @click.away="createModal = false">
+            <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-100" @click.away="createModal = false">
                 <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                     <h4 class="font-bold text-sm flex items-center gap-2">
                         <i class="fa-solid fa-bullhorn text-emerald-400"></i>
-                        <span>Publish New Announcement</span>
+                        <span>Publish Official Campus Announcement</span>
                     </h4>
                     <button @click="createModal = false" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
@@ -77,21 +92,21 @@
                     @csrf
                     <div>
                         <label class="block font-bold text-slate-700 mb-1 uppercase text-[10px]">Notice Title *</label>
-                        <input type="text" name="title" required placeholder="e.g. Midterm Examination Schedule Announcement" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+                        <input type="text" name="title" required placeholder="e.g. Midterm Examination Schedule Announcement" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold text-slate-700 mb-1 uppercase text-[10px]">Target Audience *</label>
-                            <select name="target_role" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+                            <select name="target_role" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500">
                                 <option value="all">Everyone (All Users)</option>
-                                <option value="faculty">Faculty Only</option>
+                                <option value="faculty">Faculty / Teachers Only</option>
                                 <option value="student">Students Only</option>
                                 <option value="staff">Staff Only</option>
                             </select>
                         </div>
                         <div>
                             <label class="block font-bold text-slate-700 mb-1 uppercase text-[10px]">Priority Level *</label>
-                            <select name="priority" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+                            <select name="priority" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500">
                                 <option value="normal">Normal</option>
                                 <option value="high">High Priority</option>
                                 <option value="urgent">Urgent Alert</option>
@@ -99,12 +114,12 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1 uppercase text-[10px]">Notice Content *</label>
-                        <textarea name="content" rows="4" required placeholder="Enter full announcement message..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"></textarea>
+                        <label class="block font-bold text-slate-700 mb-1 uppercase text-[10px]">Announcement Body & Details *</label>
+                        <textarea name="content" rows="4" required placeholder="Write full details, guidelines, or instructions..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:ring-2 focus:ring-emerald-500"></textarea>
                     </div>
-                    <div class="pt-2 flex justify-end space-x-2 border-t border-slate-100">
-                        <button type="button" @click="createModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-md transition">Publish Announcement</button>
+                    <div class="pt-3 flex justify-end space-x-2 border-t">
+                        <button type="button" @click="createModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">Publish Notice</button>
                     </div>
                 </form>
             </div>

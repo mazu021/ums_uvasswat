@@ -15,8 +15,16 @@ class AnnouncementController extends Controller
         $query = Announcement::with('creator');
         $perPage = $request->get('per_page', 100);
 
+        $isAuthorizedAdmin = $user && (
+            $user->hasRole('Super Admin') ||
+            $user->hasRole('Director IT') ||
+            $user->hasRole('Admin') ||
+            $user->hasRole('UVAS SWAT') ||
+            in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk'])
+        );
+
         // Non-admin roles see published announcements meant for everyone or their target role
-        if ($user && !$user->hasRole('Super Admin') && !$user->hasRole('Admin')) {
+        if (!$isAuthorizedAdmin) {
             $query->where('is_published', true);
 
             $targetRoles = ['all'];
@@ -62,6 +70,6 @@ class AnnouncementController extends Controller
         AuditService::log('Deleted Announcement', 'Announcement', $announcement->id);
         $announcement->delete();
 
-        return back()->with('success', 'Announcement removed.');
+        return back()->with('success', 'Announcement removed successfully.');
     }
 }
