@@ -84,7 +84,18 @@
             <!-- Navigation Links (Scrollbar hidden) -->
             <nav class="flex-1 px-4 py-6 overflow-y-auto space-y-6 no-scrollbar">
 
-                @if(Auth::user()->hasRole('Student'))
+                @php
+                    $u = Auth::user();
+                    $isSuperAdminUser = $u->hasRole('Super Admin') || 
+                                        $u->hasRole('Director IT') || 
+                                        $u->hasRole('University Admin') || 
+                                        $u->hasRole('Admin') || 
+                                        $u->hasRole('Super-Admin') || 
+                                        $u->hasRole('UVAS SWAT') || 
+                                        in_array($u->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
+                @endphp
+
+                @if(Auth::user()->hasRole('Student') && !$isSuperAdminUser)
                 <!-- Student Portal Menu -->
                 <div>
                     <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Student Portal</p>
@@ -136,7 +147,7 @@
                     </div>
                 </div>
 
-                @elseif(Auth::user()->hasRole('Faculty') || Auth::user()->hasRole('Teacher'))
+                @elseif((Auth::user()->hasRole('Faculty') || Auth::user()->hasRole('Teacher')) && !$isSuperAdminUser)
                 <!-- Faculty Portal Menu (EXCLUSIVELY FACULTY FEATURES) -->
                 <div>
                     <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Faculty Portal</p>
@@ -179,8 +190,7 @@
                 @else
                 <!-- Admin / Main Menu (Permission-Gated Architecture) -->
                 @php
-                    $u = Auth::user();
-                    $isSuper = $u->hasRole('Super Admin') || $u->hasRole('Director IT') || $u->hasRole('University Admin') || $u->hasRole('Admin') || $u->hasRole('Super-Admin');
+                    $isSuper = $isSuperAdminUser;
 
                     // 1. Academic Management check
                     $canAcademics = $isSuper || $u->hasAnyPermission(['manage programs', 'manage departments', 'manage courses', 'manage timetables', 'manage attendance', 'manage exams', 'submit grades', 'approve grades', 'issue transcripts', 'manage graduation', 'manage semesters', 'manage sections', 'manage admissions', 'manage students']) || $u->hasAnyRole(['Registrar', 'Admission Officer', 'Dean', 'Head of Department (HOD)', 'HOD', 'Program Coordinator', 'Controller of Examination']);
