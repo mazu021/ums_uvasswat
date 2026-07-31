@@ -123,6 +123,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::put('/{user}/permissions', [UserController::class, 'updatePermissions'])->name('update-permissions');
             Route::patch('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });

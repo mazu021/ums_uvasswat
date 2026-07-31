@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -15,7 +16,7 @@ class UserController extends Controller
     {
         $search = $request->get('search');
         $perPage = $request->get('per_page', 100);
-        $users = User::with('roles')
+        $users = User::with(['roles', 'permissions'])
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -24,8 +25,9 @@ class UserController extends Controller
             ->paginate($perPage);
 
         $roles = Role::all();
+        $permissions = Permission::orderBy('name')->get();
 
-        return view('users.index', compact('users', 'roles', 'search'));
+        return view('users.index', compact('users', 'roles', 'permissions', 'search'));
     }
 
     public function store(StoreUserRequest $request)
@@ -103,5 +105,23 @@ class UserController extends Controller
             : "User details for {$user->name} updated successfully!";
 
         return redirect()->route('users.index')->with('success', $msg);
+    }
+
+    public function updatePermissions(Request $request, User $user)
+    {
+        $request->validate([
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string|exists:permissions,name',
+        ]);
+
+        $permissions = $request->input('permissions', []);
+        $user->syncPermissions($permissions);
+
+        AuditService::log('Updated Direct User Permissions', 'User', $user->id, [
+            'name' => $user->name,
+            'permissions' => $permissions
+        ]);
+
+        return back()->with('success', "Direct granular permissions updated for {$user->name} successfully!");
     }
 }
