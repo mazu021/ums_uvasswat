@@ -101,93 +101,131 @@
     }
 }">
 
-    <!-- Top Action Bar (Hidden during Print) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
-        <div>
-            <h3 class="text-xl font-bold text-slate-800">Official UVAS Swat Student ID Card Studio</h3>
-            <p class="text-xs text-slate-500">Generate, preview, print, and bulk package department and semester student ID cards into a ZIP file.</p>
-        </div>
+    <!-- Header Banner & Action Bar -->
+    <div class="relative overflow-hidden bg-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-slate-800 print:hidden">
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-gradient-to-br from-[#373887]/40 to-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-1.5 max-w-2xl">
+                <div class="flex items-center space-x-2">
+                    <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] rounded-full uppercase tracking-wider border border-emerald-500/30">
+                        Official Studio
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium">• Dual-Sided Smart Identity Management</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Student Smart ID Card Studio</h2>
+                <p class="text-xs sm:text-sm text-slate-400 font-medium">Design, preview, print, and bulk package department & semester PVC student ID cards in high-resolution PNG & ZIP format.</p>
+            </div>
 
-        <div class="flex flex-wrap items-center gap-3">
-            <button @click="downloadZipCards()" :disabled="downloading || getSelectedForPrint().length === 0" class="px-5 py-2.5 bg-[#373887] hover:bg-[#2c2d6e] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
-                <i x-show="!downloading" class="fa-solid fa-file-zipper text-amber-400"></i>
-                <i x-show="downloading" class="fa-solid fa-spinner fa-spin"></i>
-                <span x-text="downloading ? 'Packaging ZIP (' + downloadProgress + '%)...' : 'Download All Cards ZIP (Front & Back)'"></span>
-            </button>
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <button @click="downloadZipCards()" :disabled="downloading || getSelectedForPrint().length === 0" class="px-5 py-3 bg-[#373887] hover:bg-[#2c2d6e] disabled:opacity-50 text-white font-extrabold text-xs rounded-2xl shadow-xl transition-all duration-200 flex items-center space-x-2.5 border border-indigo-500/30">
+                    <i x-show="!downloading" class="fa-solid fa-file-zipper text-amber-400 text-sm"></i>
+                    <i x-show="downloading" class="fa-solid fa-spinner fa-spin text-sm"></i>
+                    <span x-text="downloading ? 'Packaging ZIP (' + downloadProgress + '%)...' : 'Download All Cards ZIP (Front & Back)'"></span>
+                </button>
 
-            <button @click="printCards()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
-                <i class="fa-solid fa-print"></i>
-                <span x-text="'Print ID Cards (' + getSelectedForPrint().length + ' Selected)'"></span>
-            </button>
+                <button @click="printCards()" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-xl transition-all duration-200 flex items-center space-x-2.5 border border-emerald-400/30">
+                    <i class="fa-solid fa-print text-sm"></i>
+                    <span x-text="'Print PVC Sheets (' + getSelectedForPrint().length + ' Selected)'"></span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Filter & Template Selection Bar (Hidden during Print) -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 print:hidden">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-
-            <!-- Template Picker -->
-            <div class="space-y-2">
-                <label class="block font-extrabold text-slate-900 uppercase text-[10px] tracking-wider">Select ID Card Design Template</label>
+    <!-- Structured Studio Control Toolbar -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-md divide-y divide-slate-100 print:hidden overflow-hidden">
+        
+        <!-- Row 1: Design Template & Side Switcher -->
+        <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+            <!-- Templates -->
+            <div class="space-y-1.5">
+                <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Select ID Card Template</span>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button @click="activeTemplate = 'uvas_official'" :class="activeTemplate === 'uvas_official' ? 'bg-[#373887] text-white border-[#373887] font-extrabold shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition flex items-center space-x-2">
+                    <button @click="activeTemplate = 'uvas_official'" :class="activeTemplate === 'uvas_official' ? 'bg-[#373887] text-white border-[#373887] shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-certificate text-amber-400"></i>
                         <span>Template 1: Official UVAS SWAT (Dual-Sided)</span>
                     </button>
 
-                    <button @click="activeTemplate = 'dark_glass'" :class="activeTemplate === 'dark_glass' ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition flex items-center space-x-2">
-                        <i class="fa-solid fa-id-badge"></i>
+                    <button @click="activeTemplate = 'dark_glass'" :class="activeTemplate === 'dark_glass' ? 'bg-slate-900 text-white border-slate-900 shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-id-badge text-emerald-400"></i>
                         <span>Template 2: Sleek Dark</span>
                     </button>
 
-                    <button @click="activeTemplate = 'horizontal_exec'" :class="activeTemplate === 'horizontal_exec' ? 'bg-indigo-700 text-white border-indigo-700 font-extrabold shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition flex items-center space-x-2">
-                        <i class="fa-solid fa-credit-card"></i>
+                    <button @click="activeTemplate = 'horizontal_exec'" :class="activeTemplate === 'horizontal_exec' ? 'bg-indigo-700 text-white border-indigo-700 shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-credit-card text-sky-300"></i>
                         <span>Template 3: Executive Landscape</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Card Side Switcher (Only active when Template 1 is selected) -->
-            <div x-show="activeTemplate === 'uvas_official'" class="space-y-2">
-                <label class="block font-extrabold text-slate-900 uppercase text-[10px] tracking-wider">Preview Card Side</label>
-                <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
-                    <button @click="cardSide = 'front'" :class="cardSide === 'front' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'" class="px-3 py-1.5 rounded-lg transition">Front Only</button>
-                    <button @click="cardSide = 'back'" :class="cardSide === 'back' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'" class="px-3 py-1.5 rounded-lg transition">Back Only</button>
-                    <button @click="cardSide = 'both'" :class="cardSide === 'both' ? 'bg-white text-slate-900 shadow-sm font-extrabold' : 'text-slate-500'" class="px-3 py-1.5 rounded-lg transition">Both Sides</button>
+            <!-- Card Side Selector -->
+            <div x-show="activeTemplate === 'uvas_official'" class="space-y-1.5">
+                <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Preview Card Side</span>
+                <div class="inline-flex p-1 bg-slate-200/60 rounded-xl text-xs font-bold border border-slate-200">
+                    <button @click="cardSide = 'front'" :class="cardSide === 'front' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'" class="px-3.5 py-1.5 rounded-lg transition">Front Only</button>
+                    <button @click="cardSide = 'back'" :class="cardSide === 'back' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'" class="px-3.5 py-1.5 rounded-lg transition">Back Only</button>
+                    <button @click="cardSide = 'both'" :class="cardSide === 'both' ? 'bg-[#373887] text-white shadow-sm font-extrabold' : 'text-slate-600'" class="px-3.5 py-1.5 rounded-lg transition">Both Sides</button>
                 </div>
             </div>
+        </div>
 
-            <!-- Department & Semester Filters -->
-            <form method="GET" action="{{ route('academics.students.id-cards') }}" class="flex flex-wrap items-center gap-2">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Search Reg No or Name..." class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 w-44">
-                <select name="department_id" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
-                    <option value="">All Departments</option>
-                    @foreach($departments as $d)
-                        <option value="{{ $d->id }}" {{ $d->id == $departmentId ? 'selected' : '' }}>{{ $d->code }}</option>
-                    @endforeach
-                </select>
-                <select name="semester" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
-                    <option value="">All Semesters</option>
-                    @for($i = 1; $i <= 10; $i++)
-                        <option value="{{ $i }}" {{ $semester == $i ? 'selected' : '' }}>Sem {{ $i }}</option>
-                    @endfor
-                </select>
-                <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl">Filter</button>
+        <!-- Row 2: Search, Department & Semester Filter Bar -->
+        <div class="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white">
+            <form method="GET" action="{{ route('academics.students.id-cards') }}" class="flex flex-wrap items-center gap-3 flex-1">
+                
+                <!-- Search Input -->
+                <div class="relative min-w-[220px] flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Search by Reg No, Name, or Roll..." class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#373887] transition">
+                </div>
+
+                <!-- Department Selector -->
+                <div class="relative min-w-[170px]">
+                    <select name="department_id" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#373887] transition">
+                        <option value="">🏛️ All Departments</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d->id }}" {{ $d->id == $departmentId ? 'selected' : '' }}>{{ $d->code }} - {{ $d->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Semester Selector -->
+                <div class="relative min-w-[140px]">
+                    <select name="semester" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#373887] transition">
+                        <option value="">🎓 All Semesters</option>
+                        @for($i = 1; $i <= 10; $i++)
+                            <option value="{{ $i }}" {{ $semester == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <!-- Action Button -->
+                <button type="submit" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow transition">
+                    Filter Registry
+                </button>
             </form>
 
+            <div class="flex items-center space-x-2 text-xs font-bold text-slate-500 shrink-0">
+                <span class="px-3 py-1 bg-slate-100 text-slate-800 font-extrabold rounded-full border border-slate-200" x-text="studentsList.length + ' Students Found'"></span>
+            </div>
         </div>
+
     </div>
 
     <!-- Main Live Workspace & Card List (Hidden during Print) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 print:hidden">
 
         <!-- Left Column: Student Registry Selector (4 Cols) -->
-        <div class="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[720px]">
-            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Student Registry</span>
+        <div class="lg:col-span-4 bg-white rounded-3xl border border-slate-200/80 shadow-md overflow-hidden flex flex-col max-h-[720px]">
+            <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <button @click="toggleAll(true)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 font-bold text-[10px] rounded-md text-slate-700">Select All</button>
-                    <button @click="toggleAll(false)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 font-bold text-[10px] rounded-md text-slate-700">Deselect</button>
+                    <i class="fa-solid fa-users text-amber-400"></i>
+                    <span class="font-extrabold text-xs uppercase tracking-wider">Student Registry</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button @click="toggleAll(true)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 font-extrabold text-[10px] rounded-lg text-emerald-400 transition">Select All</button>
+                    <button @click="toggleAll(false)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 font-extrabold text-[10px] rounded-lg text-slate-400 transition">Deselect</button>
                 </div>
             </div>
 
