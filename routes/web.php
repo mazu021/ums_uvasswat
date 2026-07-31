@@ -182,6 +182,7 @@ Route::middleware(['auth'])->group(function () {
         // Academic Management
         Route::prefix('academics')->name('academics.')->group(function () {
             Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+            Route::get('/students/promotion', [StudentController::class, 'promotionView'])->name('students.promotion');
             Route::post('/students', [StudentController::class, 'store'])->name('students.store');
             Route::post('/students/import-excel', [StudentController::class, 'importExcel'])->name('students.import-excel');
             Route::get('/students/download-sample', [StudentController::class, 'downloadSampleCsv'])->name('students.download-sample');

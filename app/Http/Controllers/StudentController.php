@@ -397,6 +397,12 @@ class StudentController extends Controller
         return back()->with('success', "Student {$name} ({$reg}) deleted successfully.");
     }
 
+    public function promotionView(Request $request)
+    {
+        $departments = Department::all();
+        return view('academics.students_promotion', compact('departments'));
+    }
+
     public function getBatchStudents(Request $request)
     {
         $deptId = $request->input('department_id');

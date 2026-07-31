@@ -8,31 +8,7 @@
     enrollModal: false, 
     importModal: false, 
     editModal: false, 
-    editStudent: {},
-    promoteModal: false,
-    promoteDeptId: '',
-    promoteCurrentSem: '1',
-    promoteTargetSem: 2,
-    promoteStudentsList: [],
-    selectedStudentsMap: {},
-    loadingStudents: false,
-    fetchPromoteStudents() {
-        this.loadingStudents = true;
-        this.promoteStudentsList = [];
-        this.selectedStudentsMap = {};
-        this.promoteTargetSem = parseInt(this.promoteCurrentSem) + 1;
-        fetch(`{{ route('academics.students.batch-list') }}?department_id=${this.promoteDeptId}&current_semester=${this.promoteCurrentSem}`)
-            .then(res => res.json())
-            .then(data => {
-                this.promoteStudentsList = data.students || [];
-                this.promoteStudentsList.forEach(s => { this.selectedStudentsMap[s.id] = true; });
-                this.loadingStudents = false;
-            })
-            .catch(() => { this.loadingStudents = false; });
-    },
-    toggleAll(checked) {
-        this.promoteStudentsList.forEach(s => { this.selectedStudentsMap[s.id] = checked; });
-    }
+    editStudent: {}
 }">
 
     @if($errors->has('excel_file'))
@@ -48,10 +24,10 @@
             <p class="text-xs text-slate-500">Manage student profiles, registration numbers, departments, and active semesters.</p>
         </div>
         <div class="flex items-center space-x-2">
-            <button @click="promoteModal = true; fetchPromoteStudents()" class="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl shadow flex items-center space-x-2 transition">
+            <a href="{{ route('academics.students.promotion') }}" class="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl shadow flex items-center space-x-2 transition">
                 <i class="fa-solid fa-arrow-up-right-dots"></i>
-                <span>Promote Batch</span>
-            </button>
+                <span>Student Promotion</span>
+            </a>
             <button @click="importModal = true" class="px-4 py-2.5 bg-[#2e2e7f] hover:bg-[#232363] text-white font-bold text-xs rounded-xl shadow flex items-center space-x-2 transition">
                 <i class="fa-solid fa-file-excel text-amber-400"></i>
                 <span>Upload Excel Sheet</span>
@@ -419,148 +395,5 @@
 
             </form>
         </div>
-    </div>
-
-    <!-- Promote Batch Modal -->
-    <div x-show="promoteModal" x-transition class="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden" @click.away="promoteModal = false">
-            <div class="px-6 py-4 bg-gradient-to-r from-[#2e2e7f] to-[#00a257] text-white flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-amber-400 text-slate-900 rounded-lg flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-arrow-up-right-dots"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-sm">Batch Student Promotion Workflow</h4>
-                        <p class="text-[11px] text-amber-200">Promote an entire semester batch to the next academic semester</p>
-                    </div>
-                </div>
-                <button @click="promoteModal = false" class="text-white/70 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <form action="{{ route('academics.students.promote-batch') }}" method="POST" class="p-6 space-y-5 text-xs">
-                @csrf
-
-                <!-- Selection Bar: Department & Current Semester -->
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Target Department</label>
-                        <select x-model="promoteDeptId" @change="fetchPromoteStudents()" class="w-full px-3 py-2 border rounded-lg font-semibold text-slate-800 focus:border-[#2e2e7f]">
-                            <option value="">All Departments</option>
-                            @foreach($departments as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Current Semester</label>
-                        <select x-model="promoteCurrentSem" @change="fetchPromoteStudents()" class="w-full px-3 py-2 border rounded-lg font-semibold text-slate-800 focus:border-[#2e2e7f]">
-                            @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}">Semester {{ $i }}</option>
-                            @endfor
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-emerald-800 mb-1">Promote To (Target)</label>
-                        <select name="target_semester" x-model="promoteTargetSem" class="w-full px-3 py-2 border-2 border-[#00a257] bg-emerald-50 rounded-lg font-extrabold text-[#00a257]">
-                            @for($i = 1; $i <= 12; $i++)
-                                <option value="{{ $i }}">Semester {{ $i }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Student List Review & Hold Back Checklist -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <h5 class="font-extrabold text-slate-800">Review Student List (<span x-text="promoteStudentsList.length"></span> Found)</h5>
-                            <p class="text-[11px] text-slate-500">Uncheck any failed/held-back students so they stay behind in their current semester.</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button type="button" @click="toggleAll(true)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md text-[10px]">
-                                Select All
-                            </button>
-                            <button type="button" @click="toggleAll(false)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md text-[10px]">
-                                Deselect All
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Table Container -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
-                        <template x-if="loadingStudents">
-                            <div class="p-8 text-center text-slate-400 font-semibold">
-                                <i class="fa-solid fa-spinner fa-spin text-xl text-[#2e2e7f] mb-2 block"></i>
-                                Loading students for promotion...
-                            </div>
-                        </template>
-
-                        <template x-if="!loadingStudents && promoteStudentsList.length === 0">
-                            <div class="p-8 text-center text-slate-400 font-semibold">
-                                <i class="fa-solid fa-user-slash text-xl mb-2 block"></i>
-                                No active students found in this semester and department.
-                            </div>
-                        </template>
-
-                        <template x-if="!loadingStudents && promoteStudentsList.length > 0">
-                            <table class="w-full text-xs text-left text-slate-600">
-                                <thead class="bg-slate-100 text-slate-700 font-bold uppercase sticky top-0 border-b">
-                                    <tr>
-                                        <th class="p-3 w-10 text-center">Promote</th>
-                                        <th class="p-3">Reg No / Roll No</th>
-                                        <th class="p-3">Student Name</th>
-                                        <th class="p-3">Department</th>
-                                        <th class="p-3 text-right">Status Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    <template x-for="s in promoteStudentsList" :key="s.id">
-                                        <tr class="hover:bg-slate-50 transition" :class="{ 'bg-emerald-50/50': selectedStudentsMap[s.id], 'bg-rose-50/40': !selectedStudentsMap[s.id] }">
-                                            <td class="p-3 text-center">
-                                                <input type="checkbox" name="student_ids[]" :value="s.id" x-model="selectedStudentsMap[s.id]" class="w-4 h-4 text-[#00a257] rounded focus:ring-[#00a257]">
-                                            </td>
-                                            <td class="p-3 font-bold text-slate-800">
-                                                <span x-text="s.registration_number" class="text-emerald-700 block"></span>
-                                                <span x-text="s.roll_number" class="text-[10px] text-slate-400 font-normal"></span>
-                                            </td>
-                                            <td class="p-3 font-extrabold text-slate-900">
-                                                <span x-text="s.first_name + ' ' + s.last_name"></span>
-                                            </td>
-                                            <td class="p-3 font-medium text-slate-600" x-text="s.department ? s.department.name : 'General'"></td>
-                                            <td class="p-3 text-right">
-                                                <span x-show="selectedStudentsMap[s.id]" class="px-2 py-0.5 bg-emerald-100 text-[#00a257] font-extrabold rounded-full text-[10px]">
-                                                    Promote to Sem <span x-text="promoteTargetSem"></span>
-                                                </span>
-                                                <span x-show="!selectedStudentsMap[s.id]" class="px-2 py-0.5 bg-rose-100 text-rose-700 font-extrabold rounded-full text-[10px]">
-                                                    Hold Back (Sem <span x-text="s.current_semester"></span>)
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </template>
-                    </div>
-                </div>
-
-                <div class="pt-4 flex items-center justify-between border-t">
-                    <span class="text-slate-500 font-semibold">
-                        Selected to Promote: <strong class="text-[#00a257]" x-text="Object.values(selectedStudentsMap).filter(Boolean).length"></strong> / <span x-text="promoteStudentsList.length"></span>
-                    </span>
-                    <div class="flex items-center space-x-2">
-                        <button type="button" @click="promoteModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
-                        <button type="submit" :disabled="Object.values(selectedStudentsMap).filter(Boolean).length === 0" 
-                                class="px-6 py-2.5 bg-gradient-to-r from-[#2e2e7f] to-[#00a257] text-white font-extrabold rounded-xl shadow transition disabled:opacity-50 flex items-center space-x-2">
-                            <i class="fa-solid fa-check"></i>
-                            <span>Confirm & Promote Batch</span>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
 </div>
 @endsection
