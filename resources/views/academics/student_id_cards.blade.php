@@ -145,14 +145,9 @@
                         <span>Template 1: Official UVAS SWAT (Dual-Sided)</span>
                     </button>
 
-                    <button @click="activeTemplate = 'dark_glass'" :class="activeTemplate === 'dark_glass' ? 'bg-slate-900 text-white border-slate-900 shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-id-badge text-emerald-400"></i>
-                        <span>Template 2: Sleek Dark</span>
-                    </button>
-
                     <button @click="activeTemplate = 'horizontal_exec'" :class="activeTemplate === 'horizontal_exec' ? 'bg-indigo-700 text-white border-indigo-700 shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-credit-card text-sky-300"></i>
-                        <span>Template 3: Executive Landscape</span>
+                        <span>Template 2: Executive Landscape</span>
                     </button>
                 </div>
             </div>
@@ -382,65 +377,7 @@
                     </div>
                 </template>
 
-                <!-- TEMPLATE 2: SLEEK DARK GLASSMORPHISM -->
-                <template x-if="activeTemplate === 'dark_glass' && getSelectedStudent()">
-                    <div class="w-[280px] h-[450px] bg-slate-950 rounded-2xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col justify-between relative text-white">
-                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 via-transparent to-indigo-600/20 pointer-events-none"></div>
-
-                        <!-- Top Header -->
-                        <div class="p-4 text-center border-b border-slate-800 space-y-1 relative z-10">
-                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-12 h-12 object-contain mx-auto">
-                            <h4 class="font-black text-sm text-emerald-400 tracking-wider uppercase">UVAS SWAT</h4>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">University of Veterinary & Animal Sciences</p>
-                        </div>
-
-                        <!-- Body -->
-                        <div class="p-4 flex-1 flex flex-col items-center justify-between text-center space-y-2 relative z-10">
-                            <div class="w-24 h-24 rounded-2xl border-2 border-emerald-400/80 shadow-xl overflow-hidden bg-slate-900 flex items-center justify-center text-emerald-400 text-3xl font-bold">
-                                <i class="fa-solid fa-user-astronaut"></i>
-                            </div>
-
-                            <div>
-                                <h3 class="font-black text-base text-white uppercase tracking-tight" x-text="getSelectedStudent().name"></h3>
-                                <p class="text-xs font-mono font-bold text-emerald-400 mt-0.5" x-text="getSelectedStudent().reg"></p>
-                            </div>
-
-                            <div class="w-full bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-[10px] space-y-1.5 text-left font-semibold">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Program:</span>
-                                    <span class="text-slate-200 font-bold truncate max-w-[150px]" x-text="getSelectedStudent().department"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Current Sem:</span>
-                                    <span class="text-emerald-400 font-bold" x-text="'Semester ' + getSelectedStudent().semester"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Contact:</span>
-                                    <span class="text-slate-300 font-mono" x-text="getSelectedStudent().phone"></span>
-                                </div>
-                            </div>
-
-                            <!-- Dynamic QR Code Box -->
-                            <div class="p-2 bg-white rounded-xl flex items-center space-x-2 text-slate-900 w-full">
-                                <div class="w-10 h-10 bg-white p-0.5 border rounded-lg flex items-center justify-center">
-                                    <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="QR Code" class="w-full h-full object-contain">
-                                </div>
-                                <div class="text-left text-[9px] font-bold">
-                                    <p class="text-slate-900 uppercase">Verifiable Identity</p>
-                                    <p class="text-slate-500 font-mono text-[8px]">uvasswat.edu.pk</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div class="px-4 py-2 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-[9px] font-bold text-slate-400 relative z-10">
-                            <span>EXP: <strong class="text-white" x-text="getSelectedStudent().valid_till"></strong></span>
-                            <span class="text-emerald-400 uppercase">OFFICIAL BADGE</span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- TEMPLATE 3: EXECUTIVE LANDSCAPE -->
+                <!-- TEMPLATE 2: EXECUTIVE LANDSCAPE -->
                 <template x-if="activeTemplate === 'horizontal_exec' && getSelectedStudent()">
                     <div class="w-[450px] h-[280px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 flex flex-col justify-between text-slate-800">
                         <!-- Top Banner -->
