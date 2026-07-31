@@ -71,12 +71,6 @@
                     </span>
                 </div>
                 <h2 class="text-2xl font-black text-white tracking-tight">{{ $selectedCalendar->title }}</h2>
-                <p class="text-xs text-slate-300 font-medium">
-                    Published on: <span class="font-bold text-white">{{ $selectedCalendar->created_at->format('M d, Y') }}</span>
-                    @if($selectedCalendar->uploader)
-                        | Uploaded by: <span class="text-emerald-300 font-bold">{{ $selectedCalendar->uploader->name }}</span>
-                    @endif
-                </p>
             </div>
 
             <div class="flex items-center space-x-3">
