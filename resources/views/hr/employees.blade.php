@@ -7,7 +7,8 @@
 <div class="space-y-6" x-data="{ 
     createModal: false, 
     editModal: false, 
-    editEmp: { id: '', first_name: '', last_name: '', employee_code: '', email: '', department_id: '', designation: '', type: '', basic_salary: '', status: '' } 
+    createStaffType: 'faculty',
+    editEmp: { id: '', first_name: '', last_name: '', employee_code: '', email: '', department_id: '', designation: '', type: 'faculty', basic_salary: '', status: '' } 
 }">
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -45,7 +46,13 @@
                                 {{ $emp->full_name }}
                                 <span class="block text-[10px] text-slate-400 font-normal">{{ $emp->email }}</span>
                             </td>
-                            <td class="px-6 py-4 text-slate-700 font-medium">{{ $emp->department->name }}</td>
+                            <td class="px-6 py-4 text-slate-700 font-medium">
+                                @if($emp->department)
+                                    <span class="font-bold text-slate-800">{{ $emp->department->name }}</span>
+                                @else
+                                    <span class="text-slate-400 italic text-[11px]">N/A (Staff/Admin)</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 font-semibold text-emerald-800">{{ $emp->designation }}</td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $emp->type === 'faculty' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
@@ -108,49 +115,55 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">First Name</label>
+                        <label class="block font-bold text-slate-700 mb-1">First Name *</label>
                         <input type="text" name="first_name" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Last Name</label>
+                        <label class="block font-bold text-slate-700 mb-1">Last Name *</label>
                         <input type="text" name="last_name" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Employee Code</label>
+                        <label class="block font-bold text-slate-700 mb-1">Employee Code *</label>
                         <input type="text" name="employee_code" placeholder="e.g. EMP-UVAS-005" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Email Address</label>
+                        <label class="block font-bold text-slate-700 mb-1">Email Address *</label>
                         <input type="email" name="email" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Department</label>
-                        <select name="department_id" required class="w-full px-3 py-2 border rounded-lg">
-                            @foreach($departments as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Designation</label>
-                        <input type="text" name="designation" placeholder="e.g. Assistant Professor" required class="w-full px-3 py-2 border rounded-lg">
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Staff Type</label>
-                        <select name="type" class="w-full px-3 py-2 border rounded-lg">
-                            <option value="faculty">Faculty</option>
+                        <label class="block font-bold text-slate-700 mb-1">Staff Type *</label>
+                        <select name="type" x-model="createStaffType" class="w-full px-3 py-2 border rounded-lg font-bold">
+                            <option value="faculty">Faculty / Teacher</option>
                             <option value="staff">Staff</option>
                             <option value="administration">Administration</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Basic Salary (PKR)</label>
+                        <label class="block font-bold text-slate-700 mb-1">Designation *</label>
+                        <input type="text" name="designation" placeholder="e.g. Assistant Professor or IT Director" required class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Academic Department Dropdown (Shown ONLY for Faculty/Teachers) -->
+                <div x-show="createStaffType === 'faculty'">
+                    <label class="block font-bold text-slate-700 mb-1">Academic Department (For Teachers/Faculty) *</label>
+                    <select name="department_id" class="w-full px-3 py-2 border rounded-lg" :required="createStaffType === 'faculty'">
+                        <option value="">-- Select Academic Department --</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[10px] text-slate-400 mt-1">Select the teaching department assigned to this faculty member.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Basic Salary (PKR) *</label>
                         <input type="number" step="0.01" name="basic_salary" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                     <div>
@@ -200,13 +213,14 @@
                         <input type="email" name="email" x-model="editEmp.email" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Department</label>
-                        <select name="department_id" x-model="editEmp.department_id" required class="w-full px-3 py-2 border rounded-lg">
-                            @foreach($departments as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
-                            @endforeach
+                        <label class="block font-bold text-slate-700 mb-1">Staff Type</label>
+                        <select name="type" x-model="editEmp.type" class="w-full px-3 py-2 border rounded-lg font-bold">
+                            <option value="faculty">Faculty / Teacher</option>
+                            <option value="staff">Staff</option>
+                            <option value="administration">Administration</option>
                         </select>
                     </div>
                     <div>
@@ -214,15 +228,19 @@
                         <input type="text" name="designation" x-model="editEmp.designation" required class="w-full px-3 py-2 border rounded-lg">
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Staff Type</label>
-                        <select name="type" x-model="editEmp.type" class="w-full px-3 py-2 border rounded-lg">
-                            <option value="faculty">Faculty</option>
-                            <option value="staff">Staff</option>
-                            <option value="administration">Administration</option>
-                        </select>
-                    </div>
+
+                <!-- Academic Department Dropdown (Shown ONLY for Faculty/Teachers in Edit) -->
+                <div x-show="editEmp.type === 'faculty'">
+                    <label class="block font-bold text-slate-700 mb-1">Academic Department (For Teachers/Faculty)</label>
+                    <select name="department_id" x-model="editEmp.department_id" class="w-full px-3 py-2 border rounded-lg" :required="editEmp.type === 'faculty'">
+                        <option value="">-- Select Academic Department --</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Basic Salary (PKR)</label>
                         <input type="number" step="0.01" name="basic_salary" x-model="editEmp.basic_salary" required class="w-full px-3 py-2 border rounded-lg">
@@ -239,7 +257,7 @@
                 </div>
                 <div class="pt-4 flex justify-end space-x-2 border-t">
                     <button type="button" @click="editModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow">Update Employee Profile</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow">Save Changes</button>
                 </div>
             </form>
         </div>
