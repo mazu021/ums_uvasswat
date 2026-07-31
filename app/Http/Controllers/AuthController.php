@@ -16,6 +16,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showLoginForm()
+    {
+        return $this->showLogin();
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -66,6 +71,11 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
+    public function showForgotPasswordForm()
+    {
+        return $this->showForgotPassword();
+    }
+
     public function sendResetLink(Request $request)
     {
         $request->validate([
@@ -86,6 +96,9 @@ class AuthController extends Controller
 
         return back()->withErrors(['email' => 'User account not found with email: ' . $request->email]);
     }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        return $this->sendResetLink($request);
+    }
 }
-
-
