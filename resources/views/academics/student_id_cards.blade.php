@@ -4,9 +4,13 @@
 @section('header_title', 'Student Smart ID Card Studio & Generator')
 
 @section('content')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <div class="space-y-6" x-data="{
     activeTemplate: 'uvas_official',
     cardSide: 'both', // 'front', 'back', 'both'
+    downloading: false,
+    downloadProgress: 0,
     selectedStudentId: '{{ $students->first()->id ?? '' }}',
     selectedStudentsMap: {},
     studentsList: {{ json_encode($students->map(function($s) {
@@ -46,6 +50,43 @@
     },
     printCards() {
         window.print();
+    },
+    async downloadPngCards() {
+        this.downloading = true;
+        this.downloadProgress = 0;
+        const selected = this.getSelectedForPrint();
+        
+        for (let i = 0; i < selected.length; i++) {
+            const st = selected[i];
+            this.downloadProgress = Math.round(((i + 1) / selected.length) * 100);
+
+            // Export Front PNG
+            const frontEl = document.getElementById('card-front-export-' + st.id);
+            if (frontEl) {
+                try {
+                    const canvasFront = await html2canvas(frontEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
+                    const linkFront = document.createElement('a');
+                    linkFront.download = `UVAS_ID_FRONT_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`;
+                    linkFront.href = canvasFront.toDataURL('image/png');
+                    linkFront.click();
+                    await new Promise(r => setTimeout(r, 400));
+                } catch(e) {}
+            }
+
+            // Export Back PNG
+            const backEl = document.getElementById('card-back-export-' + st.id);
+            if (backEl) {
+                try {
+                    const canvasBack = await html2canvas(backEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
+                    const linkBack = document.createElement('a');
+                    linkBack.download = `UVAS_ID_BACK_${st.name.replace(/\s+/g, '_')}_${st.reg}.png`;
+                    linkBack.href = canvasBack.toDataURL('image/png');
+                    linkBack.click();
+                    await new Promise(r => setTimeout(r, 400));
+                } catch(e) {}
+            }
+        }
+        this.downloading = false;
     }
 }">
 
@@ -53,10 +94,16 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
             <h3 class="text-xl font-bold text-slate-800">Official UVAS Swat Student ID Card Studio</h3>
-            <p class="text-xs text-slate-500">Generate, preview, and print official dual-sided PVC student identity cards.</p>
+            <p class="text-xs text-slate-500">Generate, preview, print, and bulk download official dual-sided PVC student identity cards.</p>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-wrap items-center gap-3">
+            <button @click="downloadPngCards()" :disabled="downloading || getSelectedForPrint().length === 0" class="px-5 py-2.5 bg-[#373887] hover:bg-[#2c2d6e] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
+                <i x-show="!downloading" class="fa-solid fa-download"></i>
+                <i x-show="downloading" class="fa-solid fa-spinner fa-spin"></i>
+                <span x-text="downloading ? 'Exporting PNGs (' + downloadProgress + '%)...' : 'Download PNG Cards (Front & Back)'"></span>
+            </button>
+
             <button @click="printCards()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
                 <i class="fa-solid fa-print"></i>
                 <span x-text="'Print ID Cards (' + getSelectedForPrint().length + ' Selected)'"></span>
@@ -197,7 +244,7 @@
                                     <p class="text-[11px] font-bold text-slate-700 uppercase leading-snug px-1" x-text="getSelectedStudent().department"></p>
                                 </div>
 
-                                <!-- Dynamic QR Code (Pointing to https://uvasswat.edu.pk/verify?reg=...) & Card ID -->
+                                <!-- Dynamic QR Code & Card ID -->
                                 <div class="flex flex-col items-center pt-1 space-y-1">
                                     <div class="w-14 h-14 bg-white p-1 rounded-lg border border-slate-300 shadow-xs flex items-center justify-center">
                                         <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="Official UVAS QR Code" class="w-full h-full object-contain">
@@ -398,6 +445,74 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- HIDDEN DOM RENDERING CONTAINER FOR BULK PNG HTML2CANVAS EXPORT -->
+    <div class="fixed top-[-9999px] left-[-9999px] space-y-10">
+        <template x-for="st in getSelectedForPrint()" :key="'export-' + st.id">
+            <div class="space-y-4">
+                <!-- EXPORT FRONT PNG CONTAINER -->
+                <div :id="'card-front-export-' + st.id" class="w-[260px] h-[450px] bg-white border border-slate-300 flex text-slate-900 font-sans">
+                    <div class="w-[52px] bg-[#373887] text-white flex flex-col items-center justify-center py-6 relative overflow-hidden shrink-0">
+                        <div class="rotate-[-90deg] whitespace-nowrap tracking-[0.45em] font-black text-[13px] uppercase text-white">
+                            UVAS SWAT
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 flex flex-col items-center justify-between text-center space-y-2 bg-white">
+                        <div class="flex flex-col items-center">
+                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-16 h-16 object-contain">
+                        </div>
+                        <div class="w-24 h-24 rounded-full border-4 border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-3xl font-bold">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm text-slate-900 uppercase" x-text="st.name"></h3>
+                            <p class="text-[10px] font-black text-slate-600 tracking-widest uppercase">STUDENT</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-900 tracking-widest uppercase">DEPARTMENT</p>
+                            <p class="text-[11px] font-bold text-slate-700 uppercase leading-snug" x-text="st.department"></p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + st.reg" alt="QR Code" class="w-12 h-12 object-contain bg-white p-1 border rounded">
+                            <span class="font-mono font-black text-[10px] text-slate-900 uppercase" x-text="'CARD ID: ' + st.reg"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXPORT BACK PNG CONTAINER -->
+                <div :id="'card-back-export-' + st.id" class="w-[260px] h-[450px] bg-white border border-slate-300 flex flex-col justify-between text-slate-900 font-sans">
+                    <div class="h-14 bg-[#373887] flex items-center justify-center">
+                        <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center">
+                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-8 h-8 object-contain">
+                        </div>
+                    </div>
+                    <div class="px-4 py-2 flex-1 space-y-1 text-[10px] font-medium text-slate-800">
+                        <div class="flex justify-between border-b pb-1"><strong>Father Name:</strong> <span x-text="st.father_name"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Gender :</strong> <span x-text="st.gender"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Cnic no:</strong> <span class="font-mono" x-text="st.cnic"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Contact No:</strong> <span class="font-mono" x-text="st.phone"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Session:</strong> <span x-text="st.session"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Discipline:</strong> <span class="uppercase" x-text="st.dept_code"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Blood Group:</strong> <span class="font-bold text-rose-600" x-text="st.blood_group"></span></div>
+                        <div class="flex justify-between border-b pb-1"><strong>Email Address:</strong> <span x-text="st.email"></span></div>
+                        <div class="flex justify-between"><strong>Address:</strong> <span x-text="st.address"></span></div>
+                    </div>
+                    <div class="px-3 pb-3 text-center space-y-0.5">
+                        <div class="h-1 bg-slate-900 w-full mb-1"></div>
+                        <p class="font-extrabold text-[9px]">If Found, Please Post To</p>
+                        <p class="text-[8px] font-bold text-slate-700">Office of the Director Student Affairs (DSA)</p>
+                        <p class="text-[7px] text-slate-500">The University Of Veterinary & Animal Sciences</p>
+                        <p class="text-[7px] text-emerald-700 font-bold">www.uvasswat.edu.pk</p>
+                        <div class="pt-1 flex flex-col items-center">
+                            <div class="w-28 h-0.5 bg-slate-800 my-0.5"></div>
+                            <span class="text-[8px] font-extrabold uppercase">Director Student Affairs</span>
+                        </div>
+                    </div>
+                    <div class="h-5 bg-[#373887]"></div>
+                </div>
+            </div>
+        </template>
     </div>
 
     <!-- PRINT SHEET LAYOUT (ONLY VISIBLE DURING PRINT) -->
