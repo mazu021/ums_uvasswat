@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'My Courses Repository & History')
+@section('title', 'My Courses & Academic Repository')
 @section('header_title', 'Student Enrolled & Past Courses Repository')
 
 @section('content')
-<div class="space-y-6" x-data="{ courseTab: 'repository', selectedSem: 'all' }">
+<div class="space-y-6" x-data="{ courseTab: 'active', selectedSem: 'all' }">
 
     <!-- Top Summary Banner -->
     <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
@@ -41,13 +41,15 @@
     <!-- Navigation Tabs & Semester Selector -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center space-x-2 w-full sm:w-auto">
-            <button @click="courseTab = 'repository'" :class="courseTab === 'repository' ? 'bg-indigo-600 text-white font-extrabold shadow-md' : 'bg-slate-100 text-slate-700 font-bold hover:bg-slate-200'" class="px-4 py-2 text-xs rounded-xl transition flex items-center gap-2">
-                <i class="fa-solid fa-box-archive"></i>
-                <span>Past & Present Courses Repository</span>
-            </button>
+            <!-- First Tab: Active Current Semester Courses -->
             <button @click="courseTab = 'active'" :class="courseTab === 'active' ? 'bg-emerald-600 text-white font-extrabold shadow-md' : 'bg-slate-100 text-slate-700 font-bold hover:bg-slate-200'" class="px-4 py-2 text-xs rounded-xl transition flex items-center gap-2">
                 <i class="fa-solid fa-book-open"></i>
                 <span>Active Semester {{ $student->current_semester }} Courses</span>
+            </button>
+            <!-- Second Tab: Past & Present Courses Repository -->
+            <button @click="courseTab = 'repository'" :class="courseTab === 'repository' ? 'bg-indigo-600 text-white font-extrabold shadow-md' : 'bg-slate-100 text-slate-700 font-bold hover:bg-slate-200'" class="px-4 py-2 text-xs rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-box-archive"></i>
+                <span>Past & Present Courses Repository</span>
             </button>
         </div>
 
@@ -63,8 +65,49 @@
         </div>
     </div>
 
-    <!-- TAB 1: Complete Past & Present Courses Repository -->
-    <div x-show="courseTab === 'repository'" class="space-y-6">
+    <!-- TAB 1: Active Current Semester Courses Grid -->
+    <div x-show="courseTab === 'active'" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @forelse($activeOfferings as $offering)
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-xs">{{ $offering->course->course_code }}</span>
+                        <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200">{{ $offering->course->credit_hours }} Credit Hours</span>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-base text-slate-900">{{ $offering->course->title }}</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ $offering->course->description ?? 'Core degree program course offering for current active semester.' }}</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div>
+                            <p class="text-slate-400 font-medium">Assigned Instructor:</p>
+                            <p class="font-bold text-slate-800 mt-0.5">
+                                {{ $offering->teacher ? $offering->teacher->name : 'Faculty Assigned' }}
+                            </p>
+                            @if($offering->teacher && $offering->teacher->email)
+                                <p class="text-[10px] text-emerald-600">{{ $offering->teacher->email }}</p>
+                            @endif
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2.5 py-1 bg-purple-100 text-purple-800 font-extrabold rounded-lg text-[10px] block border border-purple-200">
+                                Semester {{ $offering->semester_number }} Active
+                            </span>
+                            <span class="text-[10px] text-slate-400 block mt-1">
+                                {{ $offering->program->name ?? '' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-2 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs">
+                    No active courses currently enrolled for Semester {{ $student->current_semester }}.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- TAB 2: Complete Past & Present Courses Repository -->
+    <div x-show="courseTab === 'repository'" class="space-y-6" style="display: none;">
         @for($sem = 1; $sem <= $totalProgramSemesters; $sem++)
             @php
                 $semData = $semesterRepository[$sem] ?? null;
@@ -195,47 +238,6 @@
                 </div>
             @endif
         @endfor
-    </div>
-
-    <!-- TAB 2: Active Current Semester Courses Grid -->
-    <div x-show="courseTab === 'active'" class="space-y-4" style="display: none;">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            @forelse($activeOfferings as $offering)
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <span class="px-3 py-1 bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-xs">{{ $offering->course->course_code }}</span>
-                        <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200">{{ $offering->course->credit_hours }} Credit Hours</span>
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-base text-slate-900">{{ $offering->course->title }}</h4>
-                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ $offering->course->description ?? 'Core degree program course offering for current active semester.' }}</p>
-                    </div>
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <div>
-                            <p class="text-slate-400 font-medium">Assigned Instructor:</p>
-                            <p class="font-bold text-slate-800 mt-0.5">
-                                {{ $offering->teacher ? $offering->teacher->name : 'Faculty Assigned' }}
-                            </p>
-                            @if($offering->teacher && $offering->teacher->email)
-                                <p class="text-[10px] text-emerald-600">{{ $offering->teacher->email }}</p>
-                            @endif
-                        </div>
-                        <div class="text-right">
-                            <span class="px-2.5 py-1 bg-purple-100 text-purple-800 font-extrabold rounded-lg text-[10px] block border border-purple-200">
-                                Semester {{ $offering->semester_number }} Active
-                            </span>
-                            <span class="text-[10px] text-slate-400 block mt-1">
-                                {{ $offering->program->name ?? '' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-2 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs">
-                    No active courses currently enrolled for Semester {{ $student->current_semester }}.
-                </div>
-            @endforelse
-        </div>
     </div>
 
 </div>
