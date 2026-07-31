@@ -11,7 +11,17 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::with('permissions')->get();
+        $user = auth()->user();
+        $isSuperAdminUser = $user && in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
+
+        $rolesQuery = Role::with('permissions');
+        
+        // Hide Director IT & Super Admin roles from regular admins
+        if (!$isSuperAdminUser) {
+            $rolesQuery->whereNotIn('name', ['Director IT', 'Super Admin', 'UVAS SWAT']);
+        }
+
+        $roles = $rolesQuery->get();
         $permissions = Permission::orderBy('name')->get();
 
         return view('roles.index', compact('roles', 'permissions'));
@@ -37,6 +47,13 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
+        $user = auth()->user();
+        $isSuperAdminUser = $user && in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
+
+        if (in_array($role->name, ['Director IT', 'Super Admin', 'UVAS SWAT']) && !$isSuperAdminUser) {
+            return back()->with('error', 'Role ' . $role->name . ' is a system root role and cannot be edited.');
+        }
+
         $request->validate([
             'name' => 'required|string|unique:roles,name,' . $role->id,
         ]);
@@ -51,6 +68,13 @@ class RoleController extends Controller
 
     public function updatePermissions(Request $request, Role $role)
     {
+        $user = auth()->user();
+        $isSuperAdminUser = $user && in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']);
+
+        if (in_array($role->name, ['Director IT', 'Super Admin', 'UVAS SWAT']) && !$isSuperAdminUser) {
+            return back()->with('error', 'Role ' . $role->name . ' permissions can only be managed by Super Admin.');
+        }
+
         $request->validate([
             'permissions' => 'nullable|array',
         ]);
@@ -64,7 +88,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if (in_array($role->name, ['Super Admin', 'Admin', 'Faculty', 'Student'])) {
+        if (in_array($role->name, ['Director IT', 'Super Admin', 'UVAS SWAT', 'University Admin', 'Faculty', 'Student'])) {
             return back()->with('error', "Default system role '{$role->name}' cannot be deleted.");
         }
 

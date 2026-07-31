@@ -20,9 +20,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Super Admin bypass for all permissions & abilities across all roles (UVAS SWAT, Super Admin, University Admin)
+        // Super Admin & Director IT global bypass for all system permissions
         Gate::before(function ($user, $ability) {
-            if ($user->hasRole('Super Admin') || $user->hasRole('UVAS SWAT') || $user->hasRole('Super-Admin') || $user->hasRole('University Admin')) {
+            if (
+                in_array($user->email, ['maazaliswati@gmail.com', 'directorit@uvasswat.edu.pk']) ||
+                $user->hasRole('Super Admin') ||
+                $user->hasRole('Director IT') ||
+                $user->hasRole('UVAS SWAT') ||
+                $user->hasRole('University Admin')
+            ) {
                 return true;
             }
             return null;
