@@ -172,8 +172,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/course-offerings/{courseOffering}', [CourseOfferingController::class, 'destroy'])->name('course-offerings.destroy');
         Route::get('/course-offerings/{courseOffering}/export-students', [CourseOfferingController::class, 'exportStudents'])->name('course-offerings.export-students');
 
-        Route::get('/academic-attendance/reports', [AttendanceReportController::class, 'index'])->name('attendance.reports.index');
-
         // Academic Management
         Route::prefix('academics')->name('academics.')->group(function () {
             Route::get('/students', [StudentController::class, 'index'])->name('students.index');
