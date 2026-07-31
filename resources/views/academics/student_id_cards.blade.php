@@ -175,12 +175,9 @@
 
                             <!-- Right Main Body -->
                             <div class="flex-1 p-4 flex flex-col items-center justify-between text-center space-y-2 bg-gradient-to-b from-white via-slate-50/50 to-white">
-                                <!-- Top Crest Logo -->
+                                <!-- Top Crest Official Logo -->
                                 <div class="flex flex-col items-center">
-                                    <div class="w-14 h-14 rounded-full border border-emerald-500/30 p-1 flex items-center justify-center bg-white shadow-xs">
-                                        <i class="fa-solid fa-graduation-cap text-[#373887] text-2xl"></i>
-                                    </div>
-                                    <span class="text-[7px] font-extrabold text-emerald-800 uppercase tracking-widest mt-1">SWAT</span>
+                                    <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-16 h-16 object-contain drop-shadow-xs">
                                 </div>
 
                                 <!-- Student Photo -->
@@ -215,8 +212,8 @@
                             
                             <!-- Top Polygon Accent Header -->
                             <div class="h-16 bg-[#373887] relative flex items-center justify-center clip-path-polygon">
-                                <div class="w-10 h-10 bg-white rounded-full p-1 shadow-md flex items-center justify-center text-[#373887] text-lg font-bold">
-                                    <i class="fa-solid fa-university"></i>
+                                <div class="w-11 h-11 bg-white rounded-full p-1 shadow-md flex items-center justify-center">
+                                    <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-9 h-9 object-contain">
                                 </div>
                             </div>
 
@@ -290,6 +287,7 @@
 
                         <!-- Top Header -->
                         <div class="p-4 text-center border-b border-slate-800 space-y-1 relative z-10">
+                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-12 h-12 object-contain mx-auto">
                             <h4 class="font-black text-sm text-emerald-400 tracking-wider uppercase">UVAS SWAT</h4>
                             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">University of Veterinary & Animal Sciences</p>
                         </div>
@@ -344,9 +342,9 @@
                 <template x-if="activeTemplate === 'horizontal_exec' && getSelectedStudent()">
                     <div class="w-[450px] h-[280px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 flex flex-col justify-between text-slate-800">
                         <!-- Top Banner -->
-                        <div class="bg-indigo-900 px-4 py-2.5 text-white flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-university text-amber-400 text-base"></i>
+                        <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-10 h-10 object-contain bg-white rounded-full p-0.5">
                                 <div>
                                     <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
                                     <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
@@ -418,10 +416,7 @@
                                 </div>
                                 <div class="flex-1 p-4 flex flex-col items-center justify-between text-center space-y-2">
                                     <div class="flex flex-col items-center">
-                                        <div class="w-14 h-14 rounded-full border border-emerald-500 p-1 flex items-center justify-center bg-white">
-                                            <i class="fa-solid fa-graduation-cap text-[#373887] text-2xl"></i>
-                                        </div>
-                                        <span class="text-[7px] font-extrabold text-emerald-800 uppercase tracking-widest mt-1">SWAT</span>
+                                        <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-16 h-16 object-contain">
                                     </div>
                                     <div class="w-24 h-24 rounded-full border-4 border-slate-300 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-3xl font-bold">
                                         <i class="fa-solid fa-user"></i>
@@ -444,8 +439,8 @@
                             <!-- BACK -->
                             <div class="w-[260px] h-[450px] bg-white rounded-2xl border-2 border-slate-800 flex flex-col justify-between relative text-slate-900 text-left">
                                 <div class="h-14 bg-[#373887] flex items-center justify-center">
-                                    <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#373887] text-base font-bold">
-                                        <i class="fa-solid fa-university"></i>
+                                    <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center">
+                                        <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-8 h-8 object-contain">
                                     </div>
                                 </div>
                                 <div class="px-4 py-2 flex-1 space-y-1 text-[10px] font-medium text-slate-800">
