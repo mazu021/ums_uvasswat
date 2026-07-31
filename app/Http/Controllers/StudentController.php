@@ -445,5 +445,54 @@ class StudentController extends Controller
 
         return back()->with('success', "Batch Promotion Complete! Successfully promoted {$updatedCount} students to Semester {$targetSemester}.");
     }
+
+    public function transferView(Request $request)
+    {
+        $students = Student::with('department')->orderBy('first_name')->get();
+        $departments = Department::all();
+        
+        $transferLogs = \App\Models\AuditLog::where('action', 'Student Department Transfer')
+            ->latest()
+            ->take(50)
+            ->get();
+
+        return view('academics.students_transfer', compact('students', 'departments', 'transferLogs'));
+    }
+
+    public function processTransfer(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'target_department_id' => 'required|exists:departments,id',
+            'target_semester' => 'required|integer|min:1|max:12',
+            'reason' => 'nullable|string|max:500',
+            'noc_number' => 'nullable|string|max:100',
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+        $oldDept = $student->department->name ?? 'None';
+        $targetDept = Department::findOrFail($request->target_department_id);
+
+        if ($student->department_id == $targetDept->id && $student->current_semester == $request->target_semester) {
+            return back()->with('error', 'Student is already enrolled in ' . $targetDept->name . ' Semester ' . $request->target_semester);
+        }
+
+        $student->update([
+            'department_id' => $targetDept->id,
+            'current_semester' => $request->target_semester,
+        ]);
+
+        AuditService::log('Student Department Transfer', 'Student', $student->id, [
+            'student_name' => $student->full_name,
+            'reg_no' => $student->registration_number,
+            'from_department' => $oldDept,
+            'to_department' => $targetDept->name,
+            'new_semester' => $request->target_semester,
+            'reason' => $request->reason ?? 'Department Migration',
+            'noc_number' => $request->noc_number ?? 'N/A',
+        ]);
+
+        return back()->with('success', "Transfer Completed! {$student->full_name} ({$student->registration_number}) successfully transferred to {$targetDept->name} (Semester {$request->target_semester}).");
+    }
 }
 
