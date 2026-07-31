@@ -61,12 +61,14 @@
         this.downloadProgress = 0;
         const selected = this.getSelectedForPrint();
         const zip = new JSZip();
-        const frontFolder = zip.folder('Front_Cards');
-        const backFolder = zip.folder('Back_Cards');
 
         for (let i = 0; i < selected.length; i++) {
             const st = selected[i];
             this.downloadProgress = Math.round(((i + 1) / selected.length) * 100);
+
+            const semFolder = zip.folder('Semester_' + st.semester);
+            const frontFolder = semFolder.folder('Front_Cards');
+            const backFolder = semFolder.folder('Back_Cards');
 
             // Export Front PNG
             const frontEl = document.getElementById('card-front-export-' + st.id);
@@ -103,7 +105,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
             <h3 class="text-xl font-bold text-slate-800">Official UVAS Swat Student ID Card Studio</h3>
-            <p class="text-xs text-slate-500">Generate, preview, print, and bulk package department student ID cards into a ZIP file.</p>
+            <p class="text-xs text-slate-500">Generate, preview, print, and bulk package department and semester student ID cards into a ZIP file.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -155,14 +157,20 @@
                 </div>
             </div>
 
-            <!-- Filters -->
-            <form method="GET" action="{{ route('academics.students.id-cards') }}" class="flex items-center space-x-2">
+            <!-- Department & Semester Filters -->
+            <form method="GET" action="{{ route('academics.students.id-cards') }}" class="flex flex-wrap items-center gap-2">
                 <input type="text" name="search" value="{{ $search }}" placeholder="Search Reg No or Name..." class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 w-44">
                 <select name="department_id" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
                     <option value="">All Departments</option>
                     @foreach($departments as $d)
                         <option value="{{ $d->id }}" {{ $d->id == $departmentId ? 'selected' : '' }}>{{ $d->code }}</option>
                     @endforeach
+                </select>
+                <select name="semester" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
+                    <option value="">All Semesters</option>
+                    @for($i = 1; $i <= 10; $i++)
+                        <option value="{{ $i }}" {{ $semester == $i ? 'selected' : '' }}>Sem {{ $i }}</option>
+                    @endfor
                 </select>
                 <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl">Filter</button>
             </form>
