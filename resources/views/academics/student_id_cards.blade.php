@@ -197,10 +197,10 @@
                                     <p class="text-[11px] font-bold text-slate-700 uppercase leading-snug px-1" x-text="getSelectedStudent().department"></p>
                                 </div>
 
-                                <!-- QR Code & Card ID -->
+                                <!-- Dynamic QR Code (Pointing to https://uvasswat.edu.pk/verify?reg=...) & Card ID -->
                                 <div class="flex flex-col items-center pt-1 space-y-1">
-                                    <div class="w-14 h-14 bg-slate-900 text-white rounded-lg flex items-center justify-center">
-                                        <i class="fa-solid fa-qrcode text-2xl"></i>
+                                    <div class="w-14 h-14 bg-white p-1 rounded-lg border border-slate-300 shadow-xs flex items-center justify-center">
+                                        <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="Official UVAS QR Code" class="w-full h-full object-contain">
                                     </div>
                                     <span class="font-mono font-black text-[10px] text-slate-900 uppercase" x-text="'CARD ID: ' + getSelectedStudent().reg"></span>
                                 </div>
@@ -318,14 +318,14 @@
                                 </div>
                             </div>
 
-                            <!-- QR Code Box -->
+                            <!-- Dynamic QR Code Box -->
                             <div class="p-2 bg-white rounded-xl flex items-center space-x-2 text-slate-900 w-full">
-                                <div class="w-10 h-10 bg-slate-900 text-white flex items-center justify-center font-bold text-xs rounded-lg">
-                                    <i class="fa-solid fa-qrcode text-lg"></i>
+                                <div class="w-10 h-10 bg-white p-0.5 border rounded-lg flex items-center justify-center">
+                                    <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="QR Code" class="w-full h-full object-contain">
                                 </div>
                                 <div class="text-left text-[9px] font-bold">
                                     <p class="text-slate-900 uppercase">Verifiable Identity</p>
-                                    <p class="text-slate-500 font-mono text-[8px]" x-text="'ID: ' + getSelectedStudent().reg"></p>
+                                    <p class="text-slate-500 font-mono text-[8px]">uvasswat.edu.pk</p>
                                 </div>
                             </div>
                         </div>
@@ -361,6 +361,9 @@
                                     <i class="fa-solid fa-user"></i>
                                 </div>
                                 <span class="font-mono text-[9px] font-bold text-slate-500" x-text="getSelectedStudent().reg"></span>
+                                <div class="w-8 h-8 p-0.5 border rounded bg-white">
+                                    <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="QR Code" class="w-full h-full object-contain">
+                                </div>
                             </div>
 
                             <!-- Details Column (8 cols) -->
@@ -386,7 +389,7 @@
 
                         <!-- Footer -->
                         <div class="bg-slate-100 px-4 py-1.5 border-t border-slate-200 flex items-center justify-between text-[9px] font-bold text-slate-500">
-                            <span>Campus Helpline: +92-946-9240401</span>
+                            <span>Website: <strong class="text-emerald-700">www.uvasswat.edu.pk</strong></span>
                             <span class="text-indigo-900 font-extrabold">Authorized Signature <i class="fa-solid fa-signature text-emerald-600 ms-1"></i></span>
                         </div>
                     </div>
@@ -430,7 +433,7 @@
                                         <p class="text-[11px] font-bold text-slate-700 uppercase leading-snug" x-text="st.department"></p>
                                     </div>
                                     <div class="flex flex-col items-center">
-                                        <i class="fa-solid fa-qrcode text-2xl text-slate-900"></i>
+                                        <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + st.reg" alt="QR Code" class="w-12 h-12 object-contain bg-white p-1 border rounded">
                                         <span class="font-mono font-black text-[10px] text-slate-900 uppercase" x-text="'CARD ID: ' + st.reg"></span>
                                     </div>
                                 </div>
