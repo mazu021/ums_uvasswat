@@ -213,7 +213,9 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/sessions', [AcademicSessionController::class, 'index'])->name('sessions.index');
             Route::post('/sessions', [AcademicSessionController::class, 'store'])->name('sessions.store');
+            Route::put('/sessions/{academicSession}', [AcademicSessionController::class, 'update'])->name('sessions.update');
             Route::patch('/sessions/{academicSession}/status', [AcademicSessionController::class, 'updateStatus'])->name('sessions.update-status');
+            Route::delete('/sessions/{academicSession}', [AcademicSessionController::class, 'destroy'])->name('sessions.destroy');
 
             Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
             Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
