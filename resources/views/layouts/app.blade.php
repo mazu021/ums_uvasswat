@@ -465,27 +465,73 @@
                         <i class="fa-solid" :class="isFullscreen ? 'fa-compress text-lg' : 'fa-expand text-lg'"></i>
                     </button>
 
-                    <!-- Notification Bell -->
+                    <!-- Dynamic Announcements Notification Bell -->
+                    @php
+                        $userRole = strtolower(Auth::user()->getRoleNames()->first() ?? 'student');
+                        $latestAnnouncements = \App\Models\Announcement::where(function($q) use ($userRole) {
+                                $q->where('target_role', 'all')
+                                  ->orWhere('target_role', $userRole)
+                                  ->orWhere('target_role', 'like', "%{$userRole}%");
+                            })
+                            ->where('is_published', true)
+                            ->latest('published_at')
+                            ->latest('created_at')
+                            ->take(5)
+                            ->get();
+                        $unreadCount = $latestAnnouncements->count();
+                    @endphp
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="relative p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-xl transition focus:outline-none">
+                        <button @click="open = !open" class="relative p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-xl transition focus:outline-none" title="Campus Announcements">
                             <i class="fa-regular fa-bell text-lg"></i>
-                            <span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                            @if($unreadCount > 0)
+                                <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-emerald-500 text-white text-[9px] font-black rounded-full ring-2 ring-white flex items-center justify-center shadow-xs">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
                         </button>
                         <!-- Notification Dropdown -->
-                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50" style="display: none;">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                                <h4 class="font-bold text-sm text-slate-800">System Notifications</h4>
-                                <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">New</span>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 overflow-hidden" style="display: none;">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-bullhorn text-emerald-600 text-sm"></i>
+                                    <h4 class="font-extrabold text-sm text-slate-800">Campus Announcements</h4>
+                                </div>
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
+                                    {{ $unreadCount }} Latest
+                                </span>
                             </div>
-                            <div class="space-y-3 text-xs">
-                                <div class="p-2.5 bg-emerald-50/70 rounded-xl border-l-3 border-emerald-500">
-                                    <p class="font-bold text-slate-800">Fall 2026 Academic Session Active</p>
-                                    <p class="text-slate-500 mt-0.5">Registration open for all undergraduate programs.</p>
-                                </div>
-                                <div class="p-2.5 bg-slate-50 rounded-xl border-l-3 border-slate-400">
-                                    <p class="font-bold text-slate-800">Monthly Payroll Generated</p>
-                                    <p class="text-slate-500 mt-0.5">Payslips for current month are ready to view.</p>
-                                </div>
+
+                            <div class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                                @forelse($latestAnnouncements as $ann)
+                                    <a href="{{ route('announcements.index') }}" class="block p-3 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/40 transition group">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="px-2 py-0.5 text-[9px] font-black uppercase rounded-md {{ $ann->priority === 'high' || $ann->priority === 'urgent' ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-slate-100 text-slate-700' }}">
+                                                {{ $ann->priority ?? 'Normal' }}
+                                            </span>
+                                            <span class="text-[10px] font-medium text-slate-400">
+                                                {{ $ann->created_at ? $ann->created_at->diffForHumans() : 'Recently' }}
+                                            </span>
+                                        </div>
+                                        <p class="font-extrabold text-xs text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                                            {{ $ann->title }}
+                                        </p>
+                                        <p class="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-tight">
+                                            {{ Str::limit(strip_tags($ann->content), 90) }}
+                                        </p>
+                                    </a>
+                                @empty
+                                    <div class="p-6 text-center text-slate-400 space-y-1">
+                                        <i class="fa-regular fa-bell-slash text-2xl text-slate-300"></i>
+                                        <p class="text-xs font-semibold">No recent announcements.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <div class="pt-3 mt-3 border-t border-slate-100 text-center">
+                                <a href="{{ route('announcements.index') }}" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-600 transition flex items-center justify-center gap-1.5">
+                                    <span>View All Announcements</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
