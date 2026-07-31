@@ -189,15 +189,15 @@
                     </div>
 
                     <!-- 2. Academic Management -->
-                    <div x-data="{ open: {{ request()->routeIs('academics.*') || request()->routeIs('course-offerings.*') ? 'true' : 'false' }} }">
-                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                    <div x-data="{ open: {{ (request()->routeIs('academics.*') && !request()->routeIs('academics.students.*')) || request()->routeIs('course-offerings.*') ? 'true' : 'false' }} }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ (request()->routeIs('academics.*') && !request()->routeIs('academics.students.*')) || request()->routeIs('course-offerings.*') ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
                                 <i class="fa-solid fa-graduation-cap w-6 text-center text-indigo-600"></i>
                                 <span>Academic Management</span>
                             </div>
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
-                        <div x-show="open" class="pl-7 space-y-0.5 pt-1" style="display: none;">
+                        <div x-show="open" class="pl-7 space-y-0.5 pt-1">
                             <a href="{{ route('academics.sessions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.sessions.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic Sessions</a>
                             <a href="{{ route('academics.programs.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.programs.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Programs</a>
                             <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Departments</a>
@@ -212,21 +212,21 @@
                     </div>
 
                     <!-- 3. Student Management -->
-                    <div x-data="{ open: {{ request()->routeIs('academics.students.*') || request()->routeIs('admissions.*') ? 'true' : 'false' }} }">
-                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                    <div x-data="{ open: {{ request()->routeIs('academics.students.*') || request()->routeIs('admissions.*') || request()->is('academics/students*') || request()->is('admissions*') ? 'true' : 'false' }} }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('academics.students.*') || request()->routeIs('admissions.*') || request()->is('academics/students*') || request()->is('admissions*') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
                                 <i class="fa-solid fa-user-graduate w-6 text-center text-blue-600"></i>
                                 <span>Student Management</span>
                             </div>
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
-                        <div x-show="open" class="pl-7 space-y-0.5 pt-1" style="display: none;">
-                            <a href="{{ route('admissions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Admission</a>
-                            <a href="{{ route('academics.students.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.index') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student List</a>
-                            <a href="{{ route('academics.students.promotion') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.promotion') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Promotion</a>
-                            <a href="{{ route('academics.students.transfer') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.transfer') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Transfer & Migration</a>
+                        <div x-show="open" class="pl-7 space-y-0.5 pt-1">
+                            <a href="{{ route('admissions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('admissions.*') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Admission</a>
+                            <a href="{{ route('academics.students.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.index') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student List</a>
+                            <a href="{{ route('academics.students.promotion') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.promotion') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Promotion</a>
+                            <a href="{{ route('academics.students.transfer') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.transfer') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Transfer & Migration</a>
                             <a href="{{ route('coming-soon', ['feature' => 'Student Documents Repository']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Documents</a>
-                            <a href="{{ route('academics.students.id-cards') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.id-cards') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student ID Cards</a>
+                            <a href="{{ route('academics.students.id-cards') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.id-cards') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student ID Cards</a>
                             <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Attendance</a>
                             <a href="{{ route('coming-soon', ['feature' => 'Alumni Portal & Network']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Alumni</a>
                         </div>
