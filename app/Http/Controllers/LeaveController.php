@@ -17,21 +17,55 @@ class LeaveController extends Controller
     {
         $leaveTypes = LeaveType::all();
         $user = Auth::user();
-        $perPage = $request->get('per_page', 100);
+        $perPage = $request->get('per_page', 50);
 
-        if ($user->hasRole('HR Manager') || $user->hasRole('Super Admin')) {
-            $applications = LeaveApplication::with(['employee.department', 'leaveType', 'approver'])
-                ->latest()
-                ->paginate($perPage);
-        } else {
+        $query = LeaveApplication::with(['employee.user', 'employee.department', 'leaveType', 'approver']);
+
+        // Scope filter: if regular staff wants to filter to 'mine'
+        if ($request->get('scope') === 'mine') {
             $employee = Employee::where('user_id', $user->id)->first();
-            $applications = LeaveApplication::with(['employee', 'leaveType', 'approver'])
-                ->where('employee_id', $employee->id ?? 0)
-                ->latest()
-                ->paginate($perPage);
+            $query->where('employee_id', $employee->id ?? 0);
         }
 
-        return view('hr.leaves', compact('leaveTypes', 'applications'));
+        // Search filter (Employee name, designation, reason)
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->whereHas('employee', function($empQ) use ($search) {
+                    $empQ->where('first_name', 'like', "%{$search}%")
+                         ->orWhere('last_name', 'like', "%{$search}%")
+                         ->orWhere('employee_id', 'like', "%{$search}%")
+                         ->orWhere('designation', 'like', "%{$search}%");
+                })->orWhere('reason', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Leave type filter
+        if ($request->filled('leave_type_id') && $request->leave_type_id !== 'all') {
+            $query->where('leave_type_id', $request->leave_type_id);
+        }
+
+        // Year filter
+        if ($request->filled('year') && $request->year !== 'all') {
+            $query->whereYear('start_date', $request->year);
+        }
+
+        $applications = $query->latest('start_date')->paginate($perPage)->withQueryString();
+
+        // Calculate KPI Stats
+        $stats = [
+            'total' => LeaveApplication::count(),
+            'approved' => LeaveApplication::where('status', 'approved')->count(),
+            'pending' => LeaveApplication::where('status', 'pending')->count(),
+            'rejected' => LeaveApplication::where('status', 'rejected')->count(),
+        ];
+
+        return view('hr.leaves', compact('leaveTypes', 'applications', 'stats'));
     }
 
     public function store(StoreLeaveApplicationRequest $request)
