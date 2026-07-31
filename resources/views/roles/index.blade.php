@@ -116,66 +116,6 @@
         </div>
     </div>
 
-    <!-- Roles & Permission Matrix Cards Grid -->
-    <div class="pt-4 space-y-4">
-        <h4 class="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center space-x-2">
-            <i class="fa-solid fa-table-cells text-emerald-600"></i>
-            <span>Roles & Permission Matrix Grid</span>
-        </h4>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            @foreach($roles as $role)
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm shadow-xs border border-emerald-200">
-                                <i class="fa-solid fa-user-shield"></i>
-                            </div>
-                            <h4 class="font-extrabold text-base text-slate-900">{{ $role->name }}</h4>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xs font-extrabold px-3 py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200">
-                                {{ $role->permissions->count() }} Permissions
-                            </span>
-                            <button type="button" 
-                                    @click="permRole = {{ json_encode([
-                                        'id' => $role->id,
-                                        'name' => $role->name,
-                                        'permissions' => $role->permissions->pluck('name')->toArray(),
-                                        'update_url' => route('roles.update-permissions', $role->id)
-                                    ]) }}; permModalOpen = true"
-                                    class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-1">
-                                <i class="fa-solid fa-key text-[10px]"></i>
-                                <span>Popup Modal</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Inline Permissions Checkbox Form -->
-                    <form action="{{ route('roles.update-permissions', $role->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-2 gap-2 text-xs py-2 max-h-56 overflow-y-auto pr-2">
-                            @foreach($permissions as $perm)
-                                <label class="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition cursor-pointer">
-                                    <input type="checkbox" name="permissions[]" value="{{ $perm->name }}"
-                                        {{ $role->hasPermissionTo($perm->name) ? 'checked' : '' }}
-                                        class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                                    <span class="text-slate-700 font-bold text-[11px] truncate">{{ $perm->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                        <div class="pt-3 border-t border-slate-100 flex justify-end">
-                            <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow transition">
-                                Save Matrix
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
     <!-- Assign Permissions Popup Modal -->
     <div x-show="permModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;">
         <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100" @click.away="permModalOpen = false">
