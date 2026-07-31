@@ -177,10 +177,42 @@
                 </div>
 
                 @else
-                <!-- Admin / Main Menu (Complete 12-Module Tree Architecture) -->
+                <!-- Admin / Main Menu (Permission-Gated Architecture) -->
+                @php
+                    $u = Auth::user();
+                    $isSuper = $u->hasRole('Super Admin') || $u->hasRole('Director IT') || $u->hasRole('University Admin') || $u->hasRole('Admin') || $u->hasRole('Super-Admin');
+
+                    // 1. Academic Management check
+                    $canAcademics = $isSuper || $u->hasAnyPermission(['manage programs', 'manage departments', 'manage courses', 'manage timetables', 'manage attendance', 'manage exams', 'submit grades', 'approve grades', 'issue transcripts', 'manage graduation', 'manage semesters', 'manage sections', 'manage admissions', 'manage students']) || $u->hasAnyRole(['Registrar', 'Admission Officer', 'Dean', 'Head of Department (HOD)', 'HOD', 'Program Coordinator', 'Controller of Examination']);
+
+                    // 2. Student Management check
+                    $canStudents = $isSuper || $u->hasAnyPermission(['manage admissions', 'manage students']) || $u->hasAnyRole(['Registrar', 'Admission Officer', 'Dean', 'Head of Department (HOD)', 'HOD']);
+
+                    // 3. Faculty & Staff check
+                    $canHR = $isSuper || $u->hasAnyPermission(['manage hr', 'manage employees', 'manage leaves', 'manage payroll']) || $u->hasAnyRole(['HR Manager', 'HR Officer', 'Payroll Officer', 'Dean', 'Head of Department (HOD)', 'HOD']);
+
+                    // 4. Finance check
+                    $canFinance = $isSuper || $u->hasAnyPermission(['manage fee structures', 'manage fee challans', 'verify fee proofs', 'manage accounts', 'manage scholarships', 'manage payroll']) || $u->hasAnyRole(['Finance Officer', 'Accountant', 'Payroll Officer']);
+
+                    // 5. Library check
+                    $canLibrary = $isSuper || $u->hasPermissionTo('manage library') || $u->hasRole('Librarian');
+
+                    // 6. Documents check
+                    $canDocuments = $isSuper || $u->hasAnyPermission(['issue transcripts', 'manage graduation', 'manage students']) || $u->hasAnyRole(['Registrar', 'Controller of Examination']);
+
+                    // 7. Administration check
+                    $canAdmin = $isSuper || $u->hasAnyPermission(['manage hostel', 'manage transport', 'manage inventory', 'manage procurement', 'manage assets', 'manage lab equipment', 'manage visitors']) || $u->hasAnyRole(['Hostel Warden', 'Transport Manager', 'Store Keeper', 'Procurement Officer', 'Security Officer']);
+
+                    // 8. Reports check
+                    $canReports = $isSuper || $u->hasPermissionTo('view reports') || $u->hasAnyRole(['HR Manager', 'Finance Officer', 'Controller of Examination', 'Dean', 'Head of Department (HOD)', 'HOD', 'Quality Assurance Officer', 'System Auditor']);
+
+                    // 9. System Settings check
+                    $canSettings = $isSuper || $u->hasAnyPermission(['manage system', 'manage settings', 'manage users', 'manage roles', 'view audit logs']) || $u->hasRole('IT Support');
+                @endphp
+
                 <div class="space-y-2">
 
-                    <!-- 1. Dashboard -->
+                    <!-- 1. Dashboard (Always Visible) -->
                     <div>
                         <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
                             <i class="fa-solid fa-house w-6 text-center text-emerald-600"></i>
@@ -189,6 +221,7 @@
                     </div>
 
                     <!-- 2. Academic Management -->
+                    @if($canAcademics)
                     <div x-data="{ open: {{ (request()->routeIs('academics.*') && !request()->routeIs('academics.students.*')) || request()->routeIs('course-offerings.*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ (request()->routeIs('academics.*') && !request()->routeIs('academics.students.*')) || request()->routeIs('course-offerings.*') ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -198,20 +231,36 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('academics.sessions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.sessions.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic Sessions</a>
-                            <a href="{{ route('academics.programs.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.programs.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Programs</a>
-                            <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Departments</a>
-                            <a href="{{ route('academics.courses.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.courses.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Courses & Catalog</a>
-                            <a href="{{ route('academics.curriculum.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.curriculum.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Subjects / Curriculum</a>
-                            <a href="{{ route('academics.sections.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.sections.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Sections</a>
-                            <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('attendance.reports.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Attendance</a>
-                            <a href="{{ route('academics.exams.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.exams.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Examinations</a>
-                            <a href="{{ route('academics.results.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.results.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Results</a>
+                            @if($isSuper || $u->hasAnyPermission(['manage semesters', 'manage programs']) || $u->hasAnyRole(['Registrar', 'Dean', 'Head of Department (HOD)', 'HOD']))
+                                <a href="{{ route('academics.sessions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.sessions.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic Sessions</a>
+                            @endif
+                            @if($isSuper || $u->hasAnyPermission(['manage programs', 'manage faculties']) || $u->hasAnyRole(['Registrar', 'Dean', 'Head of Department (HOD)', 'HOD', 'Program Coordinator']))
+                                <a href="{{ route('academics.programs.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.programs.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Programs</a>
+                            @endif
+                            @if($isSuper || $u->hasAnyPermission(['manage departments', 'manage faculties']) || $u->hasAnyRole(['Dean', 'Head of Department (HOD)', 'HOD']))
+                                <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Departments</a>
+                            @endif
+                            @if($isSuper || $u->hasPermissionTo('manage courses') || $u->hasAnyRole(['HOD', 'Head of Department (HOD)', 'Program Coordinator', 'Course Coordinator']))
+                                <a href="{{ route('academics.courses.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.courses.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Courses & Catalog</a>
+                                <a href="{{ route('academics.curriculum.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.curriculum.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Subjects / Curriculum</a>
+                            @endif
+                            @if($isSuper || $u->hasAnyPermission(['manage sections', 'manage batches', 'manage timetables']))
+                                <a href="{{ route('academics.sections.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.sections.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Sections</a>
+                            @endif
+                            @if($isSuper || $u->hasPermissionTo('manage attendance'))
+                                <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('attendance.reports.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Attendance</a>
+                            @endif
+                            @if($isSuper || $u->hasAnyPermission(['manage exams', 'approve grades', 'submit grades']) || $u->hasRole('Controller of Examination'))
+                                <a href="{{ route('academics.exams.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.exams.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Examinations</a>
+                                <a href="{{ route('academics.results.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.results.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Results</a>
+                            @endif
                             <a href="{{ route('academics.calendar.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.calendar.*') ? 'text-indigo-700 font-extrabold bg-indigo-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic Calendar</a>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 3. Student Management -->
+                    @if($canStudents)
                     <div x-data="{ open: {{ request()->routeIs('academics.students.*') || request()->routeIs('admissions.*') || request()->is('academics/students*') || request()->is('admissions*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('academics.students.*') || request()->routeIs('admissions.*') || request()->is('academics/students*') || request()->is('admissions*') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -221,18 +270,20 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('admissions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('admissions.*') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Admission</a>
-                            <a href="{{ route('academics.students.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.index') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student List</a>
-                            <a href="{{ route('academics.students.promotion') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.promotion') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Promotion</a>
-                            <a href="{{ route('academics.students.transfer') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.transfer') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Transfer & Migration</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Student Documents Repository']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Documents</a>
-                            <a href="{{ route('academics.students.id-cards') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.id-cards') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student ID Cards</a>
-                            <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Attendance</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Alumni Portal & Network']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Alumni</a>
+                            @if($isSuper || $u->hasPermissionTo('manage admissions') || $u->hasAnyRole(['Registrar', 'Admission Officer']))
+                                <a href="{{ route('admissions.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('admissions.*') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Admission</a>
+                            @endif
+                            @if($isSuper || $u->hasPermissionTo('manage students') || $u->hasAnyRole(['Registrar', 'Admission Officer', 'Dean', 'Head of Department (HOD)', 'HOD']))
+                                <a href="{{ route('academics.students.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.index') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student List</a>
+                                <a href="{{ route('academics.students.promotion') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.promotion') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Promotion</a>
+                                <a href="{{ route('academics.students.transfer') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.transfer') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student Transfer & Migration</a>
+                                <a href="{{ route('academics.students.id-cards') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.id-cards') ? 'text-blue-700 font-extrabold bg-blue-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Student ID Cards</a>
+                            @endif
                         </div>
                     </div>
+                    @endif
 
-                    <!-- 4. Faculty & Staff -->
+                    <!-- 4. Faculty & Staff (Common Leave Access + HR Permissions) -->
                     <div x-data="{ open: {{ request()->routeIs('hr.employees.*') || request()->routeIs('hr.attendance.*') || request()->routeIs('hr.leaves.*') || request()->routeIs('hr.departments.*') || request()->is('hr/employees*') || request()->is('hr/attendance*') || request()->is('hr/leaves*') || request()->is('hr/departments*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('hr.employees.*') || request()->routeIs('hr.attendance.*') || request()->routeIs('hr.leaves.*') || request()->routeIs('hr.departments.*') || request()->is('hr/employees*') || request()->is('hr/attendance*') || request()->is('hr/leaves*') || request()->is('hr/departments*') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -242,17 +293,22 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('hr.employees.index', ['type' => 'faculty']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=faculty*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Faculty Members</a>
-                            <a href="{{ route('hr.employees.index', ['type' => 'staff']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=staff*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Administrative Staff</a>
-                            <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Departments</a>
-                            <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Designations</a>
-                            <a href="{{ route('hr.attendance.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.attendance.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Attendance</a>
-                            <a href="{{ route('hr.leaves.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.leaves.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Leave Management</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Faculty & Staff Performance Evaluation']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Performance Evaluation</a>
+                            @if($isSuper || $u->hasAnyPermission(['manage hr', 'manage employees']) || $u->hasAnyRole(['HR Manager', 'HR Officer', 'Dean', 'Head of Department (HOD)', 'HOD']))
+                                <a href="{{ route('hr.employees.index', ['type' => 'faculty']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=faculty*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Faculty Members</a>
+                                <a href="{{ route('hr.employees.index', ['type' => 'staff']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=staff*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Administrative Staff</a>
+                                <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Departments</a>
+                                <a href="{{ route('hr.departments.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.departments.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Designations</a>
+                                <a href="{{ route('hr.attendance.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.attendance.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Attendance</a>
+                            @endif
+                            <!-- Apply for Leave / Leave Management is ALWAYS visible to all staff & faculty -->
+                            <a href="{{ route('hr.leaves.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.leaves.*') ? 'text-purple-700 font-extrabold bg-purple-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                                {{ $canHR ? 'Leave Management' : 'Apply for Leave' }}
+                            </a>
                         </div>
                     </div>
 
                     <!-- 5. Finance -->
+                    @if($canFinance)
                     <div x-data="{ open: {{ request()->routeIs('finance.*') || request()->routeIs('hr.payroll.*') || request()->is('finance*') || request()->is('hr/payroll*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('finance.*') || request()->routeIs('hr.payroll.*') || request()->is('finance*') || request()->is('hr/payroll*') ? 'bg-amber-50 text-amber-700 border-l-4 border-amber-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -262,17 +318,17 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('finance.fees.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('finance.fees.*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Fee Structure</a>
-                            <a href="{{ route('finance.fees.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('finance.fees.*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Fee Collection</a>
+                            <a href="{{ route('finance.fees.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('finance.fees.*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Fee Structure & Collection</a>
                             <a href="{{ route('finance.scholarships.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('finance.scholarships.*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Scholarships</a>
                             <a href="{{ route('finance.accounts.index', ['type' => 'debit']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=debit*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Expenses</a>
                             <a href="{{ route('finance.accounts.index', ['type' => 'credit']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->fullUrlIs('*type=credit*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Income</a>
                             <a href="{{ route('hr.payroll.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('hr.payroll.*') ? 'text-amber-700 font-extrabold bg-amber-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Payroll</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Financial Reports</a>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 6. Library -->
+                    @if($canLibrary)
                     <div x-data="{ open: {{ request()->routeIs('services.library*') || request()->is('services/library*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('services.library*') || request()->is('services/library*') ? 'bg-teal-50 text-teal-700 border-l-4 border-teal-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -282,16 +338,12 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('services.library') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('services.library') ? 'text-teal-700 font-extrabold bg-teal-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Books Catalog</a>
-                            <a href="{{ route('services.library') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Categories</a>
-                            <a href="{{ route('services.library') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Issue Books</a>
-                            <a href="{{ route('services.library') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Return Books</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Library Fine Management']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Fine Management</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Library Reports</a>
+                            <a href="{{ route('services.library') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('services.library') ? 'text-teal-700 font-extrabold bg-teal-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Books Catalog & Circulation</a>
                         </div>
                     </div>
+                    @endif
 
-                    <!-- 7. Communication -->
+                    <!-- 7. Communication (Always Visible for Announcements) -->
                     <div x-data="{ open: {{ request()->routeIs('announcements.*') || request()->is('announcements*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('announcements.*') || request()->is('announcements*') ? 'bg-rose-50 text-rose-700 border-l-4 border-rose-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -301,15 +353,12 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('announcements.*') ? 'text-rose-700 font-extrabold bg-rose-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Announcements</a>
-                            <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Notices</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Email Broadcast Engine']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Email Broadcast</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'SMS Notification Gateway']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">SMS Gateway</a>
-                            <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Notifications</a>
+                            <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('announcements.*') ? 'text-rose-700 font-extrabold bg-rose-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Campus Announcements</a>
                         </div>
                     </div>
 
                     <!-- 8. Documents -->
+                    @if($canDocuments)
                     <div x-data="{ open: {{ request()->routeIs('academics.transcript') || request()->routeIs('academics.students.download-sample') || request()->is('academics/transcript*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('academics.transcript') || request()->routeIs('academics.students.download-sample') || request()->is('academics/transcript*') ? 'bg-cyan-50 text-cyan-700 border-l-4 border-cyan-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -319,15 +368,13 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('coming-soon', ['feature' => 'Degrees & Certificates']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Certificates</a>
-                            <a href="{{ route('academics.transcript') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.transcript') ? 'text-cyan-700 font-extrabold bg-cyan-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Transcripts</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Official Letters Generator']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Letters</a>
-                            <a href="{{ route('academics.students.download-sample') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.students.download-sample') ? 'text-cyan-700 font-extrabold bg-cyan-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Downloads</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Document Templates']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Templates</a>
+                            <a href="{{ route('academics.transcript') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('academics.transcript') ? 'text-cyan-700 font-extrabold bg-cyan-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Transcripts & Certificates</a>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 9. Administration -->
+                    @if($canAdmin)
                     <div x-data="{ open: {{ request()->routeIs('services.hostel*') || request()->is('services/hostel*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('services.hostel*') || request()->is('services/hostel*') ? 'bg-[#2e2e7f]/10 text-[#2e2e7f] border-l-4 border-[#2e2e7f] font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -337,16 +384,13 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('coming-soon', ['feature' => 'Campus Management']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Campus</a>
-                            <a href="{{ route('services.hostel') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('services.hostel') ? 'text-[#2e2e7f] font-extrabold bg-[#2e2e7f]/10' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Buildings</a>
-                            <a href="{{ route('services.hostel') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Rooms & Facilities</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Official Holidays Calendar']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Holidays</a>
-                            <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Events</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Visitor Management System']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Visitor Management</a>
+                            <a href="{{ route('services.hostel') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('services.hostel') ? 'text-[#2e2e7f] font-extrabold bg-[#2e2e7f]/10' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Hostels & Facilities</a>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 10. Reports -->
+                    @if($canReports)
                     <div x-data="{ open: {{ request()->routeIs('reports.*') || request()->is('reports*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('reports.*') || request()->is('reports*') ? 'bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -356,16 +400,14 @@
                             <i class="fa-solid text-[9px] transition-transform duration-200" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('reports.*') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic Reports</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Student Reports</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Finance Reports</a>
-                            <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Attendance Reports</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Examination Reports</a>
-                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Custom Reports</a>
+                            <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('reports.index') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Academic & Institutional Reports</a>
+                            <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('attendance.reports.*') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Attendance Reports</a>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 11. System Settings -->
+                    @if($canSettings)
                     <div x-data="{ open: {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('settings.*') || request()->routeIs('audit-logs.*') || request()->is('users*') || request()->is('roles*') || request()->is('settings*') || request()->is('audit-logs*') ? 'true' : 'false' }} }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('settings.*') || request()->routeIs('audit-logs.*') || request()->is('users*') || request()->is('roles*') || request()->is('settings*') || request()->is('audit-logs*') ? 'bg-slate-100 text-slate-900 border-l-4 border-slate-700 font-extrabold shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                             <div class="flex items-center">
@@ -376,16 +418,14 @@
                         </button>
                         <div x-show="open" class="pl-7 space-y-0.5 pt-1">
                             <a href="{{ route('settings.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('settings.*') ? 'text-slate-900 font-extrabold bg-slate-100' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">General Settings</a>
-                            <a href="{{ route('settings.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Academic Settings</a>
                             <a href="{{ route('roles.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('roles.*') ? 'text-slate-900 font-extrabold bg-slate-100' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Roles & Permissions</a>
                             <a href="{{ route('users.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('users.*') ? 'text-slate-900 font-extrabold bg-slate-100' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Users Account List</a>
-                            <a href="{{ route('coming-soon', ['feature' => 'Database Backup & Restore']) }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">Backup & Restore</a>
                             <a href="{{ route('audit-logs.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg {{ request()->routeIs('audit-logs.*') ? 'text-slate-900 font-extrabold bg-slate-100' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Activity Logs</a>
-                            <a href="{{ route('settings.index') }}" class="flex items-center px-3 py-1.5 text-[11px] font-semibold rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900">System Configuration</a>
                         </div>
                     </div>
+                    @endif
 
-                    <!-- 12. Help & Support -->
+                    <!-- 12. Help & Support (Always Visible) -->
                     <div x-data="{ open: false }">
                         <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl text-slate-700 hover:bg-slate-100 transition">
                             <div class="flex items-center">
@@ -620,7 +660,7 @@
                     </div>
                 @endif
 
-                @if($errors->any())
+                @if(isset($errors) && $errors->any())
                     <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-900 text-sm shadow-xs space-y-1">
                         <p class="font-bold flex items-center space-x-2">
                             <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
