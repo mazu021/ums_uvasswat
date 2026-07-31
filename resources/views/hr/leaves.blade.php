@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Leave Management')
-@section('header_title', 'Employee Leave Applications & Past Records Registry')
+@section('title', $isAdmin ? 'Leave Management' : 'My Leave Applications')
+@section('header_title', $isAdmin ? 'Employee Leave Applications & Past Records Registry' : 'My Leave Applications & Requests')
 
 @section('content')
 <div class="space-y-6" x-data="{ applyModal: false }">
@@ -9,8 +9,12 @@
     <!-- Header & Action -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h3 class="text-xl font-bold text-slate-800">Faculty & Staff Leave Registry</h3>
-            <p class="text-xs text-slate-500">Track complete past and active leave records across all university departments, faculty, and administrative staff.</p>
+            <h3 class="text-xl font-bold text-slate-800">
+                {{ $isAdmin ? 'Faculty & Staff Leave Registry' : 'My Leave Applications' }}
+            </h3>
+            <p class="text-xs text-slate-500">
+                {{ $isAdmin ? 'Track complete past and active leave records across all university departments, faculty, and administrative staff.' : 'Apply for leave, track approval progress, and view your personal leave history.' }}
+            </p>
         </div>
         <button @click="applyModal = true" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-2 transition">
             <i class="fa-solid fa-plane-departure"></i>
@@ -25,7 +29,7 @@
                 <i class="fa-solid fa-folder-open"></i>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Leave Records</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $isAdmin ? 'Total Leave Records' : 'My Submissions' }}</p>
                 <p class="text-lg font-extrabold text-slate-800">{{ number_format($stats['total']) }}</p>
             </div>
         </div>
@@ -35,7 +39,7 @@
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Approved Leaves</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $isAdmin ? 'Approved Leaves' : 'Approved' }}</p>
                 <p class="text-lg font-extrabold text-emerald-700">{{ number_format($stats['approved']) }}</p>
             </div>
         </div>
@@ -45,7 +49,7 @@
                 <i class="fa-solid fa-clock"></i>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Approvals</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $isAdmin ? 'Pending Approvals' : 'Pending' }}</p>
                 <p class="text-lg font-extrabold text-amber-700">{{ number_format($stats['pending']) }}</p>
             </div>
         </div>
@@ -55,64 +59,66 @@
                 <i class="fa-solid fa-circle-xmark"></i>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rejected Requests</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $isAdmin ? 'Rejected Requests' : 'Declined' }}</p>
                 <p class="text-lg font-extrabold text-rose-700">{{ number_format($stats['rejected']) }}</p>
             </div>
         </div>
     </div>
 
-    <!-- Search & Filters Toolbar -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-        <form method="GET" action="{{ route('hr.leaves.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-            <div>
-                <label class="block font-bold text-slate-600 mb-1">Search Staff / Reason</label>
-                <div class="relative">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, Code, Designation..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400"></i>
+    @if($isAdmin)
+        <!-- Admin Search & Filters Toolbar -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <form method="GET" action="{{ route('hr.leaves.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Search Staff / Reason</label>
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, Code, Designation..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400"></i>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block font-bold text-slate-600 mb-1">Status</label>
-                <select name="status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Statuses</option>
-                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                </select>
-            </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Status</label>
+                    <select name="status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Statuses</option>
+                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                    </select>
+                </div>
 
-            <div>
-                <label class="block font-bold text-slate-600 mb-1">Leave Type</label>
-                <select name="leave_type_id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="all">All Leave Types</option>
-                    @foreach($leaveTypes as $lt)
-                        <option value="{{ $lt->id }}" {{ request('leave_type_id') == $lt->id ? 'selected' : '' }}>{{ $lt->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Leave Type</label>
+                    <select name="leave_type_id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="all">All Leave Types</option>
+                        @foreach($leaveTypes as $lt)
+                            <option value="{{ $lt->id }}" {{ request('leave_type_id') == $lt->id ? 'selected' : '' }}>{{ $lt->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <div>
-                <label class="block font-bold text-slate-600 mb-1">Year</label>
-                <select name="year" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="all">All Years</option>
-                    <option value="2026" {{ request('year') === '2026' ? 'selected' : '' }}>2026</option>
-                    <option value="2025" {{ request('year') === '2025' ? 'selected' : '' }}>2025</option>
-                    <option value="2024" {{ request('year') === '2024' ? 'selected' : '' }}>2024</option>
-                </select>
-            </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Year</label>
+                    <select name="year" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="all">All Years</option>
+                        <option value="2026" {{ request('year') === '2026' ? 'selected' : '' }}>2026</option>
+                        <option value="2025" {{ request('year') === '2025' ? 'selected' : '' }}>2025</option>
+                        <option value="2024" {{ request('year') === '2024' ? 'selected' : '' }}>2024</option>
+                    </select>
+                </div>
 
-            <div class="flex items-end space-x-2">
-                <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow text-xs transition flex items-center justify-center space-x-1">
-                    <i class="fa-solid fa-filter"></i>
-                    <span>Filter</span>
-                </button>
-                <a href="{{ route('hr.leaves.index') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition flex items-center justify-center">
-                    <i class="fa-solid fa-rotate-left"></i>
-                </a>
-            </div>
-        </form>
-    </div>
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow text-xs transition flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-filter"></i>
+                        <span>Filter</span>
+                    </button>
+                    <a href="{{ route('hr.leaves.index') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition flex items-center justify-center">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    @endif
 
     <!-- Leave Applications Table -->
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
@@ -177,16 +183,28 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                @if($app->status === 'pending')
-                                    <form action="{{ route('hr.leaves.update-status', $app->id) }}" method="POST" class="inline-flex space-x-1">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" name="status" value="approved" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] transition">Approve</button>
-                                        <button type="submit" name="status" value="rejected" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-[10px] transition">Reject</button>
-                                    </form>
+                                @if($isAdmin)
+                                    @if($app->status === 'pending')
+                                        <form action="{{ route('hr.leaves.update-status', $app->id) }}" method="POST" class="inline-flex space-x-1">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" name="status" value="approved" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] transition">Approve</button>
+                                            <button type="submit" name="status" value="rejected" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-[10px] transition">Reject</button>
+                                        </form>
+                                    @else
+                                        <span class="text-[10px] font-semibold text-slate-400">
+                                            {{ $app->approver ? 'By ' . $app->approver->name : 'Processed' }}
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="text-[10px] font-semibold text-slate-400">
-                                        {{ $app->approver ? 'By ' . $app->approver->name : 'Processed' }}
+                                        @if($app->status === 'approved')
+                                            Approved {{ $app->approver ? 'by ' . $app->approver->name : '' }}
+                                        @elseif($app->status === 'pending')
+                                            Pending Review
+                                        @else
+                                            Declined
+                                        @endif
                                     </span>
                                 @endif
                             </td>
@@ -195,7 +213,7 @@
                         <tr>
                             <td colspan="8" class="px-6 py-10 text-center text-slate-400 text-xs">
                                 <i class="fa-regular fa-folder-open text-2xl mb-2 text-slate-300 block"></i>
-                                <span>No leave applications or past records match your criteria.</span>
+                                <span>No leave applications found.</span>
                             </td>
                         </tr>
                     @endforelse
