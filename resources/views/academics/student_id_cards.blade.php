@@ -70,8 +70,11 @@
             const frontFolder = semFolder.folder('Front_Cards');
             const backFolder = semFolder.folder('Back_Cards');
 
+            const frontElId = this.activeTemplate === 'horizontal_exec' ? 'card-exec-front-export-' + st.id : 'card-front-export-' + st.id;
+            const backElId = this.activeTemplate === 'horizontal_exec' ? 'card-exec-back-export-' + st.id : 'card-back-export-' + st.id;
+
             // Export Front PNG
-            const frontEl = document.getElementById('card-front-export-' + st.id);
+            const frontEl = document.getElementById(frontElId);
             if (frontEl) {
                 try {
                     const canvasFront = await html2canvas(frontEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
@@ -81,7 +84,7 @@
             }
 
             // Export Back PNG
-            const backEl = document.getElementById('card-back-export-' + st.id);
+            const backEl = document.getElementById(backElId);
             if (backEl) {
                 try {
                     const canvasBack = await html2canvas(backEl, { scale: 3, useCORS: true, allowTaint: true, logging: false });
@@ -142,18 +145,18 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <button @click="activeTemplate = 'uvas_official'" :class="activeTemplate === 'uvas_official' ? 'bg-[#373887] text-white border-[#373887] shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-certificate text-amber-400"></i>
-                        <span>Template 1: Official UVAS SWAT (Dual-Sided)</span>
+                        <span>Template 1: Official UVAS SWAT (Dual-Sided Portrait)</span>
                     </button>
 
                     <button @click="activeTemplate = 'horizontal_exec'" :class="activeTemplate === 'horizontal_exec' ? 'bg-indigo-700 text-white border-indigo-700 shadow-md font-extrabold scale-[1.02]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-bold'" class="px-4 py-2 text-xs rounded-xl border transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-credit-card text-sky-300"></i>
-                        <span>Template 2: Executive Landscape</span>
+                        <span>Template 2: Executive Landscape (Dual-Sided)</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Card Side Selector -->
-            <div x-show="activeTemplate === 'uvas_official'" class="space-y-1.5">
+            <!-- Card Side Selector (Available for all templates) -->
+            <div class="space-y-1.5">
                 <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Preview Card Side</span>
                 <div class="inline-flex p-1 bg-slate-200/60 rounded-xl text-xs font-bold border border-slate-200">
                     <button @click="cardSide = 'front'" :class="cardSide === 'front' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'" class="px-3.5 py-1.5 rounded-lg transition">Front Only</button>
@@ -256,7 +259,7 @@
             <!-- CARD CANVAS CONTAINERS -->
             <div class="p-6 bg-slate-800/80 rounded-3xl border border-slate-700/60 shadow-2xl flex flex-wrap items-center justify-center gap-8">
 
-                <!-- TEMPLATE 1: OFFICIAL UVAS SWAT DUAL-SIDED ID CARD -->
+                <!-- TEMPLATE 1: OFFICIAL UVAS SWAT DUAL-SIDED PORTRAIT ID CARD -->
                 <template x-if="activeTemplate === 'uvas_official' && getSelectedStudent()">
                     <div class="flex flex-wrap items-center justify-center gap-8">
 
@@ -377,59 +380,104 @@
                     </div>
                 </template>
 
-                <!-- TEMPLATE 2: EXECUTIVE LANDSCAPE -->
+                <!-- TEMPLATE 2: EXECUTIVE LANDSCAPE (DUAL-SIDED) -->
                 <template x-if="activeTemplate === 'horizontal_exec' && getSelectedStudent()">
-                    <div class="w-[450px] h-[280px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 flex flex-col justify-between text-slate-800">
-                        <!-- Top Banner -->
-                        <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-10 h-10 object-contain bg-white rounded-full p-0.5">
-                                <div>
-                                    <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
-                                    <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                    <div class="flex flex-wrap items-center justify-center gap-8">
+                        
+                        <!-- FRONT SIDE CARD -->
+                        <div x-show="cardSide === 'front' || cardSide === 'both'" class="w-[450px] h-[280px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 flex flex-col justify-between text-slate-800 select-none">
+                            <!-- Top Banner -->
+                            <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-10 h-10 object-contain bg-white rounded-full p-0.5">
+                                    <div>
+                                        <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                        <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">STUDENT CARD</span>
+                            </div>
+
+                            <!-- Body Grid -->
+                            <div class="p-4 flex-1 grid grid-cols-12 gap-3 items-center">
+                                <!-- Avatar Column (4 cols) -->
+                                <div class="col-span-4 flex flex-col items-center justify-center space-y-1.5 border-r border-slate-200 pr-2">
+                                    <div class="w-20 h-20 rounded-xl border-2 border-indigo-700 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <span class="font-mono text-[9px] font-bold text-slate-500" x-text="getSelectedStudent().reg"></span>
+                                    <div class="w-8 h-8 p-0.5 border rounded bg-white">
+                                        <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="QR Code" class="w-full h-full object-contain">
+                                    </div>
+                                </div>
+
+                                <!-- Details Column (8 cols) -->
+                                <div class="col-span-8 space-y-2 text-left text-[10px]">
+                                    <div>
+                                        <h3 class="font-black text-sm text-slate-900 uppercase leading-tight" x-text="getSelectedStudent().name"></h3>
+                                        <p class="text-[10px] text-indigo-700 font-extrabold" x-text="getSelectedStudent().department"></p>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-slate-700 font-semibold bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                        <div>Roll No: <strong class="text-slate-900 font-mono" x-text="getSelectedStudent().roll"></strong></div>
+                                        <div>Semester: <strong class="text-slate-900" x-text="getSelectedStudent().semester"></strong></div>
+                                        <div>Father Name: <strong class="text-slate-900" x-text="getSelectedStudent().father_name"></strong></div>
+                                        <div>Blood Group: <strong class="text-rose-600 font-bold" x-text="getSelectedStudent().blood_group"></strong></div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between text-[8px] text-slate-400 pt-1">
+                                        <span>Issue: <strong class="text-slate-700" x-text="getSelectedStudent().issue_date"></strong></span>
+                                        <span>Expiry: <strong class="text-slate-700" x-text="getSelectedStudent().valid_till"></strong></span>
+                                    </div>
                                 </div>
                             </div>
-                            <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">STUDENT CARD</span>
+
+                            <!-- Footer -->
+                            <div class="bg-slate-100 px-4 py-1.5 border-t border-slate-200 flex items-center justify-between text-[9px] font-bold text-slate-500">
+                                <span>Website: <strong class="text-emerald-700">www.uvasswat.edu.pk</strong></span>
+                                <span class="text-indigo-900 font-extrabold">Authorized Signature <i class="fa-solid fa-signature text-emerald-600 ms-1"></i></span>
+                            </div>
                         </div>
 
-                        <!-- Body Grid -->
-                        <div class="p-4 flex-1 grid grid-cols-12 gap-3 items-center">
-                            <!-- Avatar Column (4 cols) -->
-                            <div class="col-span-4 flex flex-col items-center justify-center space-y-1.5 border-r border-slate-200 pr-2">
-                                <div class="w-20 h-20 rounded-xl border-2 border-indigo-700 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold">
-                                    <i class="fa-solid fa-user"></i>
+                        <!-- BACK SIDE CARD (EXECUTIVE LANDSCAPE) -->
+                        <div x-show="cardSide === 'back' || cardSide === 'both'" class="w-[450px] h-[280px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 flex flex-col justify-between text-slate-800 select-none">
+                            <!-- Top Banner -->
+                            <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-9 h-9 object-contain bg-white rounded-full p-0.5">
+                                    <div>
+                                        <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                        <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                                    </div>
                                 </div>
-                                <span class="font-mono text-[9px] font-bold text-slate-500" x-text="getSelectedStudent().reg"></span>
-                                <div class="w-8 h-8 p-0.5 border rounded bg-white">
-                                    <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + getSelectedStudent().reg" alt="QR Code" class="w-full h-full object-contain">
-                                </div>
+                                <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">TERMS & DETAILS (BACK)</span>
                             </div>
 
-                            <!-- Details Column (8 cols) -->
-                            <div class="col-span-8 space-y-2 text-left text-[10px]">
-                                <div>
-                                    <h3 class="font-black text-sm text-slate-900 uppercase leading-tight" x-text="getSelectedStudent().name"></h3>
-                                    <p class="text-[10px] text-indigo-700 font-extrabold" x-text="getSelectedStudent().department"></p>
-                                </div>
+                            <!-- Body Content Grid -->
+                            <div class="p-3.5 flex-1 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] font-semibold text-slate-700">
+                                <div class="flex justify-between border-b pb-1"><span>Father Name:</span> <strong class="text-slate-900" x-text="getSelectedStudent().father_name"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Gender:</span> <strong class="text-slate-900" x-text="getSelectedStudent().gender"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>CNIC No:</span> <strong class="text-slate-900 font-mono" x-text="getSelectedStudent().cnic"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Contact No:</span> <strong class="text-slate-900 font-mono" x-text="getSelectedStudent().phone"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Session:</span> <strong class="text-slate-900" x-text="getSelectedStudent().session"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Discipline:</span> <strong class="text-slate-900 uppercase" x-text="getSelectedStudent().dept_code"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Blood Group:</span> <strong class="text-rose-600 font-bold" x-text="getSelectedStudent().blood_group"></strong></div>
+                                <div class="flex justify-between border-b pb-1"><span>Email:</span> <strong class="text-slate-900 truncate max-w-[110px]" x-text="getSelectedStudent().email"></strong></div>
+                                <div class="col-span-2 flex justify-between border-b pb-1"><span>Address:</span> <strong class="text-slate-900 truncate max-w-[300px]" x-text="getSelectedStudent().address"></strong></div>
+                            </div>
 
-                                <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-slate-700 font-semibold bg-slate-50 p-2 rounded-lg border border-slate-200">
-                                    <div>Roll No: <strong class="text-slate-900 font-mono" x-text="getSelectedStudent().roll"></strong></div>
-                                    <div>Semester: <strong class="text-slate-900" x-text="getSelectedStudent().semester"></strong></div>
-                                    <div>Father Name: <strong class="text-slate-900" x-text="getSelectedStudent().father_name"></strong></div>
-                                    <div>Blood Group: <strong class="text-rose-600 font-bold" x-text="getSelectedStudent().blood_group"></strong></div>
+                            <!-- Footer Notice & Signature -->
+                            <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-[8px] text-slate-600">
+                                <div class="space-y-0.5 text-left">
+                                    <p class="font-extrabold text-slate-900">If Found, Please Return To:</p>
+                                    <p class="font-medium text-slate-700">Director Student Affairs (DSA), UVAS Swat • <span class="text-emerald-700 font-bold">www.uvasswat.edu.pk</span></p>
                                 </div>
-
-                                <div class="flex items-center justify-between text-[8px] text-slate-400 pt-1">
-                                    <span>Issue: <strong class="text-slate-700" x-text="getSelectedStudent().issue_date"></strong></span>
-                                    <span>Expiry: <strong class="text-slate-700" x-text="getSelectedStudent().valid_till"></strong></span>
+                                <div class="flex flex-col items-center pl-2">
+                                    <i class="fa-solid fa-signature text-slate-700 text-xs"></i>
+                                    <div class="w-24 h-0.5 bg-slate-800 my-0.5"></div>
+                                    <span class="text-[7px] font-black uppercase text-slate-900">Director Student Affairs</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div class="bg-slate-100 px-4 py-1.5 border-t border-slate-200 flex items-center justify-between text-[9px] font-bold text-slate-500">
-                            <span>Website: <strong class="text-emerald-700">www.uvasswat.edu.pk</strong></span>
-                            <span class="text-indigo-900 font-extrabold">Authorized Signature <i class="fa-solid fa-signature text-emerald-600 ms-1"></i></span>
                         </div>
                     </div>
                 </template>
@@ -443,7 +491,7 @@
     <div class="fixed top-[-9999px] left-[-9999px] space-y-10">
         <template x-for="st in getSelectedForPrint()" :key="'export-' + st.id">
             <div class="space-y-4">
-                <!-- EXPORT FRONT PNG CONTAINER -->
+                <!-- EXPORT PORTRAIT FRONT PNG -->
                 <div :id="'card-front-export-' + st.id" class="w-[260px] h-[450px] bg-white border border-slate-300 flex text-slate-900 font-sans">
                     <div class="w-[52px] bg-[#373887] text-white flex flex-col items-center justify-center py-6 relative overflow-hidden shrink-0">
                         <div class="rotate-[-90deg] whitespace-nowrap tracking-[0.45em] font-black text-[13px] uppercase text-white">
@@ -472,7 +520,7 @@
                     </div>
                 </div>
 
-                <!-- EXPORT BACK PNG CONTAINER -->
+                <!-- EXPORT PORTRAIT BACK PNG -->
                 <div :id="'card-back-export-' + st.id" class="w-[260px] h-[450px] bg-white border border-slate-300 flex flex-col justify-between text-slate-900 font-sans">
                     <div class="h-14 bg-[#373887] flex items-center justify-center">
                         <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center">
@@ -503,6 +551,86 @@
                     </div>
                     <div class="h-5 bg-[#373887]"></div>
                 </div>
+
+                <!-- EXPORT LANDSCAPE FRONT PNG -->
+                <div :id="'card-exec-front-export-' + st.id" class="w-[450px] h-[280px] bg-white border border-slate-300 flex flex-col justify-between text-slate-800 font-sans">
+                    <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-10 h-10 object-contain bg-white rounded-full p-0.5">
+                            <div>
+                                <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">STUDENT CARD</span>
+                    </div>
+                    <div class="p-4 flex-1 grid grid-cols-12 gap-3 items-center">
+                        <div class="col-span-4 flex flex-col items-center justify-center space-y-1.5 border-r border-slate-200 pr-2">
+                            <div class="w-20 h-20 rounded-xl border-2 border-indigo-700 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="font-mono text-[9px] font-bold text-slate-500" x-text="st.reg"></span>
+                            <div class="w-8 h-8 p-0.5 border rounded bg-white">
+                                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + st.reg" alt="QR Code" class="w-full h-full object-contain">
+                            </div>
+                        </div>
+                        <div class="col-span-8 space-y-2 text-left text-[10px]">
+                            <div>
+                                <h3 class="font-black text-sm text-slate-900 uppercase leading-tight" x-text="st.name"></h3>
+                                <p class="text-[10px] text-indigo-700 font-extrabold" x-text="st.department"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-slate-700 font-semibold bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                <div>Roll No: <strong class="text-slate-900 font-mono" x-text="st.roll"></strong></div>
+                                <div>Semester: <strong class="text-slate-900" x-text="st.semester"></strong></div>
+                                <div>Father Name: <strong class="text-slate-900" x-text="st.father_name"></strong></div>
+                                <div>Blood Group: <strong class="text-rose-600 font-bold" x-text="st.blood_group"></strong></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[8px] text-slate-400 pt-1">
+                                <span>Issue: <strong class="text-slate-700" x-text="st.issue_date"></strong></span>
+                                <span>Expiry: <strong class="text-slate-700" x-text="st.valid_till"></strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 px-4 py-1.5 border-t border-slate-200 flex items-center justify-between text-[9px] font-bold text-slate-500">
+                        <span>Website: <strong class="text-emerald-700">www.uvasswat.edu.pk</strong></span>
+                        <span class="text-indigo-900 font-extrabold">Authorized Signature</span>
+                    </div>
+                </div>
+
+                <!-- EXPORT LANDSCAPE BACK PNG -->
+                <div :id="'card-exec-back-export-' + st.id" class="w-[450px] h-[280px] bg-white border border-slate-300 flex flex-col justify-between text-slate-800 font-sans">
+                    <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-9 h-9 object-contain bg-white rounded-full p-0.5">
+                            <div>
+                                <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">TERMS & DETAILS (BACK)</span>
+                    </div>
+                    <div class="p-3.5 flex-1 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] font-semibold text-slate-700">
+                        <div class="flex justify-between border-b pb-1"><span>Father Name:</span> <strong class="text-slate-900" x-text="st.father_name"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Gender:</span> <strong class="text-slate-900" x-text="st.gender"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>CNIC No:</span> <strong class="text-slate-900 font-mono" x-text="st.cnic"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Contact No:</span> <strong class="text-slate-900 font-mono" x-text="st.phone"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Session:</span> <strong class="text-slate-900" x-text="st.session"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Discipline:</span> <strong class="text-slate-900 uppercase" x-text="st.dept_code"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Blood Group:</span> <strong class="text-rose-600 font-bold" x-text="st.blood_group"></strong></div>
+                        <div class="flex justify-between border-b pb-1"><span>Email:</span> <strong class="text-slate-900 truncate max-w-[110px]" x-text="st.email"></strong></div>
+                        <div class="col-span-2 flex justify-between border-b pb-1"><span>Address:</span> <strong class="text-slate-900 truncate max-w-[300px]" x-text="st.address"></strong></div>
+                    </div>
+                    <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-[8px] text-slate-600">
+                        <div class="space-y-0.5 text-left">
+                            <p class="font-extrabold text-slate-900">If Found, Please Return To:</p>
+                            <p class="font-medium text-slate-700">Director Student Affairs (DSA), UVAS Swat • <span class="text-emerald-700 font-bold">www.uvasswat.edu.pk</span></p>
+                        </div>
+                        <div class="flex flex-col items-center pl-2">
+                            <span class="text-[7px] font-black uppercase text-slate-900">Director Student Affairs</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </template>
     </div>
@@ -513,7 +641,7 @@
             <template x-for="st in getSelectedForPrint()" :key="st.id">
                 <div class="flex justify-center mb-8 break-inside-avoid">
 
-                    <!-- PRINT TEMPLATE 1: OFFICIAL UVAS SWAT DUAL-SIDED ID CARD -->
+                    <!-- PRINT TEMPLATE 1: OFFICIAL UVAS SWAT DUAL-SIDED PORTRAIT ID CARD -->
                     <template x-if="activeTemplate === 'uvas_official'">
                         <div class="flex items-center justify-center gap-6">
 
@@ -578,6 +706,90 @@
                                 <div class="h-5 bg-[#373887]"></div>
                             </div>
 
+                        </div>
+                    </template>
+
+                    <!-- PRINT TEMPLATE 2: EXECUTIVE LANDSCAPE DUAL-SIDED ID CARD -->
+                    <template x-if="activeTemplate === 'horizontal_exec'">
+                        <div class="flex flex-col items-center gap-6">
+                            <!-- FRONT LANDSCAPE -->
+                            <div class="w-[450px] h-[280px] bg-white border-2 border-slate-800 rounded-2xl flex flex-col justify-between text-slate-800 text-left">
+                                <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-10 h-10 object-contain bg-white rounded-full p-0.5">
+                                        <div>
+                                            <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                            <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">STUDENT CARD</span>
+                                </div>
+                                <div class="p-4 flex-1 grid grid-cols-12 gap-3 items-center">
+                                    <div class="col-span-4 flex flex-col items-center justify-center space-y-1.5 border-r border-slate-200 pr-2">
+                                        <div class="w-20 h-20 rounded-xl border-2 border-indigo-700 overflow-hidden bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <span class="font-mono text-[9px] font-bold text-slate-500" x-text="st.reg"></span>
+                                        <div class="w-8 h-8 p-0.5 border rounded bg-white">
+                                            <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://uvasswat.edu.pk/verify?reg=' + st.reg" alt="QR Code" class="w-full h-full object-contain">
+                                        </div>
+                                    </div>
+                                    <div class="col-span-8 space-y-2 text-left text-[10px]">
+                                        <div>
+                                            <h3 class="font-black text-sm text-slate-900 uppercase leading-tight" x-text="st.name"></h3>
+                                            <p class="text-[10px] text-indigo-700 font-extrabold" x-text="st.department"></p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-slate-700 font-semibold bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                            <div>Roll No: <strong class="text-slate-900 font-mono" x-text="st.roll"></strong></div>
+                                            <div>Semester: <strong class="text-slate-900" x-text="st.semester"></strong></div>
+                                            <div>Father Name: <strong class="text-slate-900" x-text="st.father_name"></strong></div>
+                                            <div>Blood Group: <strong class="text-rose-600 font-bold" x-text="st.blood_group"></strong></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-[8px] text-slate-400 pt-1">
+                                            <span>Issue: <strong class="text-slate-700" x-text="st.issue_date"></strong></span>
+                                            <span>Expiry: <strong class="text-slate-700" x-text="st.valid_till"></strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-100 px-4 py-1.5 border-t border-slate-200 flex items-center justify-between text-[9px] font-bold text-slate-500">
+                                    <span>Website: <strong class="text-emerald-700">www.uvasswat.edu.pk</strong></span>
+                                    <span class="text-indigo-900 font-extrabold">Authorized Signature</span>
+                                </div>
+                            </div>
+
+                            <!-- BACK LANDSCAPE -->
+                            <div class="w-[450px] h-[280px] bg-white border-2 border-slate-800 rounded-2xl flex flex-col justify-between text-slate-800 text-left">
+                                <div class="bg-indigo-900 px-4 py-2 text-white flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <img src="{{ asset('images/uvas_official_logo.png') }}" alt="UVAS Logo" class="w-9 h-9 object-contain bg-white rounded-full p-0.5">
+                                        <div>
+                                            <h4 class="font-black text-xs tracking-wider uppercase">UVAS SWAT</h4>
+                                            <p class="text-[8px] text-indigo-200 font-semibold uppercase">Univ. of Veterinary & Animal Sciences Swat</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] rounded uppercase">TERMS & DETAILS (BACK)</span>
+                                </div>
+                                <div class="p-3.5 flex-1 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] font-semibold text-slate-700">
+                                    <div class="flex justify-between border-b pb-1"><span>Father Name:</span> <strong class="text-slate-900" x-text="st.father_name"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Gender:</span> <strong class="text-slate-900" x-text="st.gender"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>CNIC No:</span> <strong class="text-slate-900 font-mono" x-text="st.cnic"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Contact No:</span> <strong class="text-slate-900 font-mono" x-text="st.phone"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Session:</span> <strong class="text-slate-900" x-text="st.session"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Discipline:</span> <strong class="text-slate-900 uppercase" x-text="st.dept_code"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Blood Group:</span> <strong class="text-rose-600 font-bold" x-text="st.blood_group"></strong></div>
+                                    <div class="flex justify-between border-b pb-1"><span>Email:</span> <strong class="text-slate-900 truncate max-w-[110px]" x-text="st.email"></strong></div>
+                                    <div class="col-span-2 flex justify-between border-b pb-1"><span>Address:</span> <strong class="text-slate-900 truncate max-w-[300px]" x-text="st.address"></strong></div>
+                                </div>
+                                <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 flex items-center justify-between text-[8px] text-slate-600">
+                                    <div class="space-y-0.5 text-left">
+                                        <p class="font-extrabold text-slate-900">If Found, Please Return To:</p>
+                                        <p class="font-medium text-slate-700">Director Student Affairs (DSA), UVAS Swat • <span class="text-emerald-700 font-bold">www.uvasswat.edu.pk</span></p>
+                                    </div>
+                                    <div class="flex flex-col items-center pl-2">
+                                        <span class="text-[7px] font-black uppercase text-slate-900">Director Student Affairs</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </template>
 
