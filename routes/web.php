@@ -85,12 +85,28 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // 2. Dedicated Faculty & Teacher Routes (Restricted to Faculty, Teachers, Admins)
-    Route::middleware(['role:Faculty|Teacher|Super Admin|Admin'])->group(function () {
+    Route::middleware(['role:Faculty|Teacher|Super Admin|Admin|Staff|Accounts|HR'])->group(function () {
         Route::get('/academic-attendance/teacher', [AttendanceEngineController::class, 'teacherDashboard'])->name('attendance.teacher.dashboard');
         Route::get('/academic-attendance/offering/{courseOffering}/mark', [AttendanceEngineController::class, 'markAttendanceForm'])->name('attendance.mark.form');
         Route::post('/academic-attendance/offering/{courseOffering}/store', [AttendanceEngineController::class, 'storeAttendance'])->name('attendance.mark.store');
         Route::get('/academic-attendance/offering/{courseOffering}/history', [AttendanceEngineController::class, 'offeringHistory'])->name('attendance.offering.history');
         Route::get('/academic-attendance/session/{attendanceSession}', [AttendanceEngineController::class, 'showSession'])->name('attendance.session.detail');
+        Route::get('/academic-attendance/reports', [AttendanceReportController::class, 'index'])->name('attendance.reports.index');
+
+        // Faculty Exams, Results & Transcripts for Assigned Courses
+        Route::prefix('academics')->name('academics.')->group(function () {
+            Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
+            Route::post('/exams', [ExamController::class, 'store'])->name('exams.store');
+            Route::post('/exams/grades', [ExamController::class, 'storeGrade'])->name('exams.store-grade');
+            Route::post('/exams/gradebook/save', [ExamController::class, 'saveGradebook'])->name('exams.save-gradebook');
+            Route::get('/exams/gradebook/{offering}/export', [ExamController::class, 'exportGradebook'])->name('exams.export-gradebook');
+            Route::get('/results', [ResultController::class, 'index'])->name('results.index');
+
+            Route::get('/exams/{exam}/seating-plan', [ExaminationModuleController::class, 'seatingPlan'])->name('exams.seating-plan');
+            Route::get('/transcript', [ExaminationModuleController::class, 'transcript'])->name('transcript');
+            Route::get('/students/{student}/transcript', [ExaminationModuleController::class, 'transcript'])->name('exams.transcript');
+            Route::get('/students/{student}/degree-audit', [ExaminationModuleController::class, 'degreeAudit'])->name('exams.degree-audit');
+        });
     });
 
     // 3. Admin & Staff Management Routes (Restricted: NOT accessible by Students or Faculty Teachers!)
@@ -186,12 +202,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/course-registration', [CourseRegistrationController::class, 'store'])->name('course-registration.store');
             Route::patch('/course-registration/{registration}/status', [CourseRegistrationController::class, 'updateStatus'])->name('course-registration.update-status');
 
-            Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
-            Route::post('/exams', [ExamController::class, 'store'])->name('exams.store');
-            Route::post('/exams/grades', [ExamController::class, 'storeGrade'])->name('exams.store-grade');
-            Route::post('/exams/gradebook/save', [ExamController::class, 'saveGradebook'])->name('exams.save-gradebook');
-            Route::get('/exams/gradebook/{offering}/export', [ExamController::class, 'exportGradebook'])->name('exams.export-gradebook');
-
             Route::get('/sessions', [AcademicSessionController::class, 'index'])->name('sessions.index');
             Route::post('/sessions', [AcademicSessionController::class, 'store'])->name('sessions.store');
             Route::patch('/sessions/{academicSession}/status', [AcademicSessionController::class, 'updateStatus'])->name('sessions.update-status');
@@ -202,18 +212,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/sections', [SectionController::class, 'index'])->name('sections.index');
             Route::post('/sections', [SectionController::class, 'store'])->name('sections.store');
 
-            Route::get('/results', [ResultController::class, 'index'])->name('results.index');
-
             Route::get('/timetable', [TimetableController::class, 'index'])->name('timetable.index');
             Route::post('/timetable', [TimetableController::class, 'store'])->name('timetable.store');
 
             Route::post('/calendar/upload', [AcademicCalendarController::class, 'upload'])->name('calendar.upload');
             Route::delete('/calendar/{academicCalendar}', [AcademicCalendarController::class, 'destroy'])->name('calendar.destroy');
-
-            Route::get('/exams/{exam}/seating-plan', [ExaminationModuleController::class, 'seatingPlan'])->name('exams.seating-plan');
-            Route::get('/transcript', [ExaminationModuleController::class, 'transcript'])->name('transcript');
-            Route::get('/students/{student}/transcript', [ExaminationModuleController::class, 'transcript'])->name('exams.transcript');
-            Route::get('/students/{student}/degree-audit', [ExaminationModuleController::class, 'degreeAudit'])->name('exams.degree-audit');
         });
 
         // Finance & Accounts

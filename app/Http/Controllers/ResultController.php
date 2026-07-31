@@ -23,6 +23,17 @@ class ResultController extends Controller
             'courseOffering.teacher'
         ]);
 
+        $user = auth()->user();
+        if (!$user->hasRole('Super Admin') && !$user->hasRole('Admin') && !$user->hasRole('HOD')) {
+            $employee = \App\Models\Employee::where('user_id', $user->id)->orWhere('email', $user->email)->first();
+            $query->whereHas('courseOffering', function ($cq) use ($user, $employee) {
+                $cq->where('teacher_id', $user->id);
+                if ($employee) {
+                    $cq->orWhere('teacher_id', $employee->id);
+                }
+            });
+        }
+
         if ($search) {
             $query->whereHas('student', function ($sq) use ($search) {
                 $sq->where('first_name', 'like', "%{$search}%")
