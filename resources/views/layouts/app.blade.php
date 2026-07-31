@@ -89,48 +89,48 @@
                 <div>
                     <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Student Portal</p>
                     <div class="space-y-1">
-                        <a href="{{ route('student.dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('student.dashboard') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-gauge-high w-6 text-center {{ request()->routeIs('student.dashboard') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('student.dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('student.dashboard') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-gauge-high w-6 text-center text-emerald-600"></i>
                             <span>Dashboard</span>
                         </a>
-                        <a href="{{ route('student.courses') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('student.courses') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-book-open w-6 text-center {{ request()->routeIs('student.courses') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('student.courses') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('student.courses') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-book-open w-6 text-center text-indigo-600"></i>
                             <span>Enrolled Courses</span>
                         </a>
-                        <a href="{{ route('attendance.student.dashboard') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('attendance.student.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-calendar-check w-6 text-center {{ request()->routeIs('attendance.student.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('attendance.student.dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('attendance.student.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-calendar-check w-6 text-center text-blue-600"></i>
                             <span>Attendance Record</span>
                         </a>
                         <!-- Examination & Transcripts Dropdown -->
                         <div x-data="{ openExams: {{ request()->routeIs('student.exams') || request()->routeIs('student.transcript') ? 'true' : 'false' }} }" class="space-y-1">
-                            <button @click="openExams = !openExams" class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('student.exams') || request()->routeIs('student.transcript') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <button @click="openExams = !openExams" class="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-xl transition {{ request()->routeIs('student.exams') || request()->routeIs('student.transcript') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100' }}">
                                 <div class="flex items-center">
-                                    <i class="fa-solid fa-award w-6 text-center {{ request()->routeIs('student.exams') || request()->routeIs('student.transcript') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                                    <i class="fa-solid fa-award w-6 text-center text-amber-600"></i>
                                     <span>Exams & Transcripts</span>
                                 </div>
-                                <i class="fa-solid text-[10px] transition-transform duration-200" :class="openExams ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                <i class="fa-solid text-[9px] transition-transform duration-200" :class="openExams ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                             </button>
-                            <div x-show="openExams" class="pl-8 space-y-1 pt-1">
-                                <a href="{{ route('student.exams') }}" class="flex items-center space-x-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ request()->routeIs('student.exams') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <div x-show="openExams" class="pl-7 space-y-0.5 pt-1">
+                                <a href="{{ route('student.exams') }}" class="flex items-center space-x-2 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition {{ request()->routeIs('student.exams') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
                                     <i class="fa-solid fa-table-list text-[10px]"></i>
                                     <span>Exam Marks & Grades</span>
                                 </a>
-                                <a href="{{ route('student.transcript') }}" class="flex items-center space-x-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ request()->routeIs('student.transcript') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                                <a href="{{ route('student.transcript') }}" class="flex items-center space-x-2 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition {{ request()->routeIs('student.transcript') ? 'text-emerald-700 font-extrabold bg-emerald-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
                                     <i class="fa-solid fa-file-pdf text-[10px]"></i>
                                     <span>Download Transcript</span>
                                 </a>
                             </div>
                         </div>
-                        <a href="{{ route('student.fees') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('student.fees') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-file-invoice-dollar w-6 text-center {{ request()->routeIs('student.fees') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('student.fees') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('student.fees') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-file-invoice-dollar w-6 text-center text-amber-600"></i>
                             <span>Fee Challans & Proof</span>
                         </a>
-                        <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('announcements.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-bullhorn w-6 text-center {{ request()->routeIs('announcements.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('announcements.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-bullhorn w-6 text-center text-rose-600"></i>
                             <span>Announcements & Alerts</span>
                         </a>
-                        <a href="{{ route('academics.calendar.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('academics.calendar.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-calendar-days w-6 text-center {{ request()->routeIs('academics.calendar.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('academics.calendar.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('academics.calendar.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-calendar-days w-6 text-center text-cyan-600"></i>
                             <span>Academic Calendar</span>
                         </a>
                     </div>
@@ -141,36 +141,36 @@
                 <div>
                     <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Faculty Portal</p>
                     <div class="space-y-1">
-                        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-gauge-high w-6 text-center {{ request()->routeIs('dashboard') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-gauge-high w-6 text-center text-emerald-600"></i>
                             <span>Faculty Dashboard</span>
                         </a>
-                        <a href="{{ route('attendance.teacher.dashboard') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('attendance.teacher.*') || request()->routeIs('attendance.mark.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-layer-group w-6 text-center {{ request()->routeIs('attendance.teacher.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('attendance.teacher.dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('attendance.teacher.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-layer-group w-6 text-center text-indigo-600"></i>
                             <span>Assigned Courses & Classes</span>
                         </a>
-                        <a href="{{ route('attendance.teacher.dashboard') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('attendance.mark.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-clipboard-user w-6 text-center {{ request()->routeIs('attendance.mark.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('attendance.teacher.dashboard') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('attendance.mark.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-clipboard-user w-6 text-center text-blue-600"></i>
                             <span>Take Attendance</span>
                         </a>
-                        <a href="{{ route('academics.exams.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('academics.exams.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-award w-6 text-center {{ request()->routeIs('academics.exams.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('academics.exams.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('academics.exams.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-award w-6 text-center text-amber-600"></i>
                             <span>Exam Marks & Grades</span>
                         </a>
-                        <a href="{{ route('hr.leaves.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('hr.leaves.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-umbrella-beach w-6 text-center {{ request()->routeIs('hr.leaves.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('hr.leaves.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('hr.leaves.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-umbrella-beach w-6 text-center text-purple-600"></i>
                             <span>Apply for Leave</span>
                         </a>
-                        <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('attendance.reports.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-chart-pie w-6 text-center {{ request()->routeIs('attendance.reports.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('attendance.reports.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('attendance.reports.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-chart-pie w-6 text-center text-teal-600"></i>
                             <span>Attendance Reports</span>
                         </a>
-                        <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('announcements.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-bullhorn w-6 text-center {{ request()->routeIs('announcements.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('announcements.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-bullhorn w-6 text-center text-rose-600"></i>
                             <span>Campus Announcements</span>
                         </a>
-                        <a href="{{ route('academics.calendar.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-colors {{ request()->routeIs('academics.calendar.*') ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <i class="fa-solid fa-calendar-days w-6 text-center {{ request()->routeIs('academics.calendar.*') ? 'text-emerald-600' : 'text-slate-400' }}"></i>
+                        <a href="{{ route('academics.calendar.index') }}" class="flex items-center px-3 py-2 text-xs font-bold rounded-xl transition-colors {{ request()->routeIs('academics.calendar.*') ? 'bg-emerald-50 text-emerald-700 font-extrabold border-l-4 border-emerald-600 shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-solid fa-calendar-days w-6 text-center text-cyan-600"></i>
                             <span>Academic Calendar</span>
                         </a>
                     </div>
