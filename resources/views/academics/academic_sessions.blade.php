@@ -23,16 +23,7 @@
         </button>
     </div>
 
-    <!-- Flash Notifications -->
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center justify-between shadow-xs">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-    @endif
+
 
     <!-- Data Table Card -->
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
