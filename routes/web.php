@@ -185,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/students/promotion', [StudentController::class, 'promotionView'])->name('students.promotion');
             Route::get('/students/transfer', [StudentController::class, 'transferView'])->name('students.transfer');
             Route::post('/students/transfer', [StudentController::class, 'processTransfer'])->name('students.process-transfer');
+            Route::get('/students/id-cards', [\App\Http\Controllers\StudentIdCardController::class, 'index'])->name('students.id-cards');
             Route::post('/students', [StudentController::class, 'store'])->name('students.store');
             Route::post('/students/import-excel', [StudentController::class, 'importExcel'])->name('students.import-excel');
             Route::get('/students/download-sample', [StudentController::class, 'downloadSampleCsv'])->name('students.download-sample');
