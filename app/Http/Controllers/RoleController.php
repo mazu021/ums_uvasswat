@@ -12,7 +12,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')
-            ->whereNotIn('name', ['Super Admin', 'Director IT', 'UVAS SWAT'])
+            ->where('name', '!=', 'Super Admin')
             ->get();
         $permissions = Permission::orderBy('name')->get();
 

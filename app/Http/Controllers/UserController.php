@@ -22,10 +22,6 @@ class UserController extends Controller
         $usersQuery = User::with(['roles', 'permissions'])
             ->where('email', '!=', 'maazaliswati@gmail.com');
 
-        if (!$isSuperAdminUser) {
-            $usersQuery->where('email', '!=', 'directorit@uvasswat.edu.pk');
-        }
-
         $users = $usersQuery
             ->when($search, function ($query, $search) {
                 return $query->where(function($q) use ($search) {
@@ -36,7 +32,7 @@ class UserController extends Controller
             ->latest()
             ->paginate($perPage);
 
-        $roles = Role::whereNotIn('name', ['Director IT', 'Super Admin', 'UVAS SWAT'])->get();
+        $roles = Role::where('name', '!=', 'Super Admin')->get();
 
         $permissions = Permission::orderBy('name')->get();
 
