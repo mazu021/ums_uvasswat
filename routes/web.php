@@ -131,7 +131,9 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('/', [RoleController::class, 'index'])->name('index');
             Route::post('/', [RoleController::class, 'store'])->name('store');
+            Route::put('/{role}', [RoleController::class, 'update'])->name('update');
             Route::put('/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('update-permissions');
+            Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
         });
 
         // HR & Administration

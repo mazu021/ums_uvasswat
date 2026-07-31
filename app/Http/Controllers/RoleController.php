@@ -12,7 +12,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->get();
-        $permissions = Permission::all();
+        $permissions = Permission::orderBy('name')->get();
 
         return view('roles.index', compact('roles', 'permissions'));
     }
@@ -35,6 +35,20 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('success', "Role '{$role->name}' created successfully.");
     }
 
+    public function update(Request $request, Role $role)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:roles,name,' . $role->id,
+        ]);
+
+        $oldName = $role->name;
+        $role->update(['name' => $request->name]);
+
+        AuditService::log('Updated Role Name', 'Role', $role->id, ['old' => $oldName, 'new' => $role->name]);
+
+        return redirect()->route('roles.index')->with('success', "Role updated successfully.");
+    }
+
     public function updatePermissions(Request $request, Role $role)
     {
         $request->validate([
@@ -46,5 +60,17 @@ class RoleController extends Controller
         AuditService::log('Updated Role Permissions', 'Role', $role->id, ['role' => $role->name]);
 
         return redirect()->route('roles.index')->with('success', "Permissions updated for role '{$role->name}'.");
+    }
+
+    public function destroy(Role $role)
+    {
+        if (in_array($role->name, ['Super Admin', 'Admin', 'Faculty', 'Student'])) {
+            return back()->with('error', "Default system role '{$role->name}' cannot be deleted.");
+        }
+
+        AuditService::log('Deleted Role', 'Role', $role->id, ['role' => $role->name]);
+        $role->delete();
+
+        return redirect()->route('roles.index')->with('success', "Role deleted successfully.");
     }
 }

@@ -4,13 +4,13 @@
 @section('header_title', 'User & Account Management')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModalOpen: false, editModalOpen: false, permModalOpen: false, editUser: {}, permUser: {} }">
+<div class="space-y-6" x-data="{ createModalOpen: false, editModalOpen: false, editUser: {} }">
 
     <!-- Header Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h3 class="text-xl font-bold text-slate-800">System Users & Credentials</h3>
-            <p class="text-xs text-slate-500">Manage login accounts, toggle active/suspended status, and assign RBAC roles & direct permissions.</p>
+            <p class="text-xs text-slate-500">Manage login accounts, toggle active/suspended status, and edit user profile details.</p>
         </div>
         <button @click="createModalOpen = true" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
             <i class="fa-solid fa-user-plus"></i>
@@ -48,17 +48,13 @@
                         <th class="px-4 py-3.5 text-center w-12">S.No</th>
                         <th class="px-6 py-3.5">User Details</th>
                         <th class="px-6 py-3.5">Assigned Role</th>
-                        <th class="px-6 py-3.5">Direct Permissions</th>
                         <th class="px-6 py-3.5">Phone</th>
                         <th class="px-6 py-3.5">Status</th>
-                        <th class="px-6 py-3.5 text-center w-44">Action</th>
+                        <th class="px-6 py-3.5 text-center w-36">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($users as $u)
-                        @php
-                            $userDirectPermissions = $u->permissions->pluck('name')->toArray();
-                        @endphp
                         <tr class="hover:bg-slate-50/80 transition">
                             <!-- S.No Column -->
                             <td class="px-4 py-4 text-center font-bold text-slate-400">
@@ -80,16 +76,6 @@
                                     {{ $u->roles->first()->name ?? 'No Role' }}
                                 </span>
                             </td>
-                            <!-- Direct Permissions -->
-                            <td class="px-6 py-4">
-                                @if(count($userDirectPermissions) > 0)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                        {{ count($userDirectPermissions) }} Direct Permissions
-                                    </span>
-                                @else
-                                    <span class="text-slate-400 text-[11px] font-medium">Role Default</span>
-                                @endif
-                            </td>
                             <!-- Phone -->
                             <td class="px-6 py-4 font-medium text-slate-600">{{ $u->phone ?? 'N/A' }}</td>
                             <!-- Status -->
@@ -100,7 +86,7 @@
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">Suspended</span>
                                 @endif
                             </td>
-                            <!-- Compact Action Buttons Block -->
+                            <!-- Compact Action Buttons Block (Matches exact UI design) -->
                             <td class="px-6 py-4 text-center">
                                 <div class="inline-flex rounded-xl shadow-xs border border-slate-300 overflow-hidden divide-x divide-slate-200 bg-white">
                                     
@@ -118,21 +104,6 @@
                                             class="p-2 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800 transition" 
                                             title="Edit User & Password">
                                         <i class="fa-solid fa-pen text-xs"></i>
-                                    </button>
-
-                                    <!-- Assign Direct Permissions Popup Button -->
-                                    <button type="button" 
-                                            @click="permUser = {{ json_encode([
-                                                'id' => $u->id,
-                                                'name' => $u->name,
-                                                'email' => $u->email,
-                                                'role' => $u->roles->first()->name ?? 'No Role',
-                                                'permissions' => $userDirectPermissions,
-                                                'update_url' => route('users.update-permissions', $u->id)
-                                            ]) }}; permModalOpen = true"
-                                            class="p-2 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 transition" 
-                                            title="Assign Permissions">
-                                        <i class="fa-solid fa-key text-xs"></i>
                                     </button>
 
                                     <!-- Toggle Active/Suspend Status Button -->
@@ -162,7 +133,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-slate-400 font-semibold">No users found.</td>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-400 font-semibold">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -170,54 +141,6 @@
         </div>
         <div class="p-4 border-t border-slate-200 bg-slate-50">
             {{ $users->links() }}
-        </div>
-    </div>
-
-    <!-- Assign Direct Permissions Popup Modal -->
-    <div x-show="permModalOpen" x-transition class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100" @click.away="permModalOpen = false">
-            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-sm text-white">Assign Direct Permissions</h4>
-                        <p class="text-[10px] text-slate-300" x-text="'User: ' + permUser.name + ' (' + permUser.role + ')'"></p>
-                    </div>
-                </div>
-                <button @click="permModalOpen = false" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <form :action="permUser.update_url" method="POST" class="p-6 space-y-4 text-xs">
-                @csrf
-                @method('PUT')
-
-                <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 flex items-center space-x-3">
-                    <i class="fa-solid fa-circle-info text-emerald-600 text-base"></i>
-                    <p class="text-xs font-medium">Select specific permissions below to assign directly to this user in addition to their assigned role permissions.</p>
-                </div>
-
-                <!-- Permissions Checkboxes Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto p-1 border border-slate-200 rounded-2xl bg-slate-50/50">
-                    @foreach($permissions as $perm)
-                        <label class="flex items-center space-x-2 p-2 bg-white rounded-xl border border-slate-200 hover:border-emerald-400 transition cursor-pointer shadow-2xs">
-                            <input type="checkbox" name="permissions[]" value="{{ $perm->name }}"
-                                :checked="permUser.permissions && permUser.permissions.includes('{{ $perm->name }}')"
-                                class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                            <span class="text-slate-800 font-bold text-[11px] truncate">{{ $perm->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-
-                <div class="pt-3 flex items-center justify-between border-t border-slate-100">
-                    <button type="button" @click="permModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition flex items-center space-x-2">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Save User Permissions</span>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
