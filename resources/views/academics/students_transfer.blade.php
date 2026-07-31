@@ -16,15 +16,32 @@
             'semester' => $s->current_semester,
         ];
     })) }},
+    sourceDepartmentId: '',
+    searchQuery: '',
     selectedStudentId: '',
     selectedStudent: null,
     targetDepartmentId: '',
     targetSemester: '1',
+    getFilteredStudents() {
+        return this.studentsList.filter(s => {
+            const matchesDept = !this.sourceDepartmentId || s.department_id == this.sourceDepartmentId;
+            const q = this.searchQuery.toLowerCase().trim();
+            const matchesSearch = !q || 
+                s.name.toLowerCase().includes(q) || 
+                s.reg.toLowerCase().includes(q) || 
+                s.roll.toLowerCase().includes(q);
+            return matchesDept && matchesSearch;
+        });
+    },
     onStudentSelect() {
         this.selectedStudent = this.studentsList.find(s => s.id == this.selectedStudentId) || null;
         if (this.selectedStudent) {
             this.targetSemester = this.selectedStudent.semester;
         }
+    },
+    selectStudentDirectly(st) {
+        this.selectedStudentId = st.id;
+        this.onStudentSelect();
     }
 }">
 
@@ -46,7 +63,7 @@
         <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
                 <h4 class="font-extrabold text-sm text-slate-900 flex items-center space-x-2">
-                    <i class="fa-solid fa-[#2e2e7f] fa-right-left text-emerald-600"></i>
+                    <i class="fa-solid fa-right-left text-emerald-600"></i>
                     <span>Execute Department Migration</span>
                 </h4>
                 <span class="text-xs font-bold text-slate-400">Inter-Departmental Transfer</span>
@@ -55,20 +72,53 @@
             <form action="{{ route('academics.students.process-transfer') }}" method="POST" class="space-y-5 text-xs">
                 @csrf
 
-                <!-- Step 1: Select Student -->
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1.5 uppercase text-[10px] tracking-wider">1. Select Student to Transfer *</label>
-                    <select name="student_id" x-model="selectedStudentId" @change="onStudentSelect()" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 text-xs focus:ring-2 focus:ring-emerald-500">
-                        <option value="">-- Choose Student by Name or Registration Number --</option>
-                        <template x-for="st in studentsList" :key="st.id">
-                            <option :value="st.id" x-text="st.name + ' (' + st.reg + ') - Current: ' + st.department_name + ' Sem ' + st.semester"></option>
-                        </template>
-                    </select>
+                <!-- Step 1: Filter & Select Student -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <label class="block font-extrabold text-slate-900 uppercase text-[11px] tracking-wider">
+                            <i class="fa-solid fa-filter text-emerald-600 me-1"></i>
+                            1. Search & Filter Student to Transfer *
+                        </label>
+                        <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-extrabold text-[10px] rounded-full" x-text="getFilteredStudents().length + ' Students Available'"></span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Source Department Filter -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1 text-[10px]">Filter by Current Department</label>
+                            <select x-model="sourceDepartmentId" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500">
+                                <option value="">All Departments (Show All)</option>
+                                @foreach($departments as $d)
+                                    <option value="{{ $d->id }}">{{ $d->name }} ({{ $d->code }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Live Search Input -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1 text-[10px]">Search Name, Reg No or Roll No</label>
+                            <div class="relative">
+                                <input type="text" x-model="searchQuery" placeholder="Type student name or reg no..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown List of Filtered Students -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1 text-[10px]">Select Target Student *</label>
+                        <select name="student_id" x-model="selectedStudentId" @change="onStudentSelect()" required class="w-full px-3 py-2.5 bg-white border-2 border-emerald-500 rounded-xl font-extrabold text-slate-900 text-xs focus:ring-2 focus:ring-emerald-500">
+                            <option value="">-- Select Student from Filtered List --</option>
+                            <template x-for="st in getFilteredStudents()" :key="st.id">
+                                <option :value="st.id" x-text="st.name + ' (' + st.reg + ') | Dept: ' + st.department_name + ' (Sem ' + st.semester + ')'"></option>
+                            </template>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Selected Student Live Preview Banner -->
                 <template x-if="selectedStudent">
-                    <div class="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-2">
+                    <div class="p-4 bg-emerald-50/90 border border-emerald-300 rounded-2xl space-y-2 shadow-xs">
                         <div class="flex items-center justify-between">
                             <h5 class="font-extrabold text-slate-900 text-xs flex items-center space-x-2">
                                 <i class="fa-solid fa-user-graduate text-emerald-600"></i>
@@ -76,9 +126,9 @@
                             </h5>
                             <span class="px-2.5 py-0.5 bg-emerald-200 text-emerald-900 font-extrabold text-[10px] rounded-full" x-text="'Reg: ' + selectedStudent.reg"></span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
-                            <p>Current Department: <strong class="text-slate-800" x-text="selectedStudent.department_name"></strong></p>
-                            <p>Current Semester: <strong class="text-slate-800" x-text="'Semester ' + selectedStudent.semester"></strong></p>
+                        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-700 font-medium">
+                            <p>Current Department: <strong class="text-slate-900 font-extrabold" x-text="selectedStudent.department_name"></strong></p>
+                            <p>Current Semester: <strong class="text-slate-900 font-extrabold" x-text="'Semester ' + selectedStudent.semester"></strong></p>
                         </div>
                     </div>
                 </template>
@@ -134,6 +184,7 @@
                 </div>
                 <h4 class="font-extrabold text-sm text-white">Migration Policy & Rules</h4>
                 <ul class="text-xs text-slate-300 space-y-2 font-normal leading-relaxed list-disc list-inside">
+                    <li>Use Department filter & search box to locate any student in seconds.</li>
                     <li>Student transfers automatically reassign student records to the new department roster.</li>
                     <li>Exam grades and fee history are preserved seamlessly across migrations.</li>
                     <li>Every transfer logs an audit entry with NOC reference numbers.</li>
